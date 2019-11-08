@@ -14,7 +14,7 @@ k0 = 50
 r = 4 # power law exponent
 minDeg = 50
 maxDeg = 100
-n = 100
+n = 10000
 simplexSize = 3
 
 # Epidemic parameters
@@ -57,7 +57,7 @@ print(betaCrit)
 print(alphaCrit)
 
 beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFraction*betaCrit, numBetaPts),
-                      np.linspace(endBetaCritFraction*betaCrit*(1-1.0/(numBetaPts-1)), startBetaCritFraction*betaCrit, numBetaPts-1)])
+                      np.linspace(betaCrit*(endBetaCritFraction-(endBetaCritFraction-startBetaCritFraction)/(numBetaPts-1)), startBetaCritFraction*betaCrit, numBetaPts-1)])
 alpha = np.linspace(startAlphaCritFraction*alphaCrit, endAlphaCritFraction*alphaCrit, numAlphaPts)
 
 start = time.time()

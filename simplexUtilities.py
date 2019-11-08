@@ -101,11 +101,13 @@ def generateConfigModelSimplexList(degreeSequence, simplexSize):
     return simplexList, simplexIndices
 
 
-def generateUniformSimplexList(numSimplices, simplexSize, rule='non-assortative'):
+def generateUniformSimplexList(n, numSimplices, simplexSize):
+    simplexIndices = [[] for i in range(n)]
     simplexList = np.empty([numSimplices, simplexSize])
-
     for i in range(numSimplices):
         u = random.choices(range(n), k=simplexSize)
+        for index in u:
+            simplexIndices[index].append(i)
         # I think the chances are very low to have a duplicate.
         simplexList[i,:] = u
-    return simplexList
+    return simplexList, simplexIndices

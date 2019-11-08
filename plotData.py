@@ -5,7 +5,7 @@ import simplexUtilities
 import simplexContagion
 
 
-filename = 'equilibriaData11072019-102634'
+filename = 'equilibriaData11082019-131247'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 alpha = data[0]
@@ -22,7 +22,7 @@ plt.show()
 
 hysteresis = []
 for i in range(len(alpha)):
-    hysteresis.append(simplexContagion.calculateHysteresis(equilibria[i], beta, option='infinity'))
+    hysteresis.append(simplexContagion.calculateHysteresis(equilibria[i], beta, option='area'))
 
 plt.figure()
 plt.plot(alpha, hysteresis, 'o-')
