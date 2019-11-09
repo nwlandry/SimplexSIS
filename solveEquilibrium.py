@@ -22,12 +22,12 @@ maxK = 100
 avgK = 75
 avgSquaredK = 5833.3
 betaCrit = avgK/avgSquaredK*gamma
-betaList = np.linspace(0, 0.1, 100)
+betaList = np.linspace(0, 0.1, 20)
 print(betaCrit)
 digitsOfPrecision = 5
 
 # equilibriumV = simplexTheory.solveUniformEquilbrium(gamma, betaList, alpha, minK, maxK, digitsOfPrecision)
-maxK = 10000
+maxK = 1000
 r = 4
 
 equilibriumV = simplexTheory.solvePowerLawEquilbrium(gamma, betaList, alpha, minK, maxK, r, digitsOfPrecision)

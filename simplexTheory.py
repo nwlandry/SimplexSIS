@@ -43,7 +43,7 @@ def powerLawEquilibriumFunction(V, gamma, beta, alpha, minK, maxK, r):
     sum = 0
     for k in range(minK, maxK+1):
         sum = sum + truncatedPowerLaw(k, minK, maxK, r)*k**2*(beta + alpha*V)/(gamma + beta*k*V + alpha*k*V**2)
-    return avgK*sum - 1
+    return 1/avgK*sum - 1
 
 def calculateAvgInfected(V, gamma, beta, alpha, minK, maxK):
     frac = 1/(maxK-minK+1)

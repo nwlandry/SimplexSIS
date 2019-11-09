@@ -4,6 +4,9 @@ from scipy.sparse import csr_matrix
 import numpy as np
 import multiprocessing as mp
 
+def avgPowerK(k, power):
+    return np.asscalar(np.power(k, power).mean())
+
 def invCDF(u, k0, n, exponent):
     return (k0**(1-exponent) + u*(n**(1-exponent) - k0**(1-exponent)))**(1/(1-exponent))
 
