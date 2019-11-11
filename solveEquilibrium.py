@@ -5,14 +5,14 @@ from numpy.polynomial.polynomial import polyroots
 import pickle
 import simplexTheory
 
-filename = 'equilibriaData11072019-102634'
+filename = 'equilibriaData11092019-083731'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 alpha = data[0]
 beta = data[1]
 equilibria = data[2]
 plt.figure()
-plt.plot(beta, equilibria[-1], 'o-', label=r"$\alpha=0.075$")
+plt.plot(beta, equilibria[-1], 'o-', label=r"$\alpha=$"+str(alpha[-1]))
 
 
 gamma = 2
@@ -22,12 +22,13 @@ maxK = 100
 avgK = 75
 avgSquaredK = 5833.3
 betaCrit = avgK/avgSquaredK*gamma
-betaList = np.linspace(0, 0.1, 20)
+betaList = np.linspace(0, 0.04, 40)
+#betaList = beta
 print(betaCrit)
 digitsOfPrecision = 5
 
 # equilibriumV = simplexTheory.solveUniformEquilbrium(gamma, betaList, alpha, minK, maxK, digitsOfPrecision)
-maxK = 1000
+maxK = 500
 r = 4
 
 equilibriumV = simplexTheory.solvePowerLawEquilbrium(gamma, betaList, alpha, minK, maxK, r, digitsOfPrecision)

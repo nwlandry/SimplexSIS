@@ -5,7 +5,7 @@ import simplexUtilities
 import simplexContagion
 
 
-filename = 'equilibriaData11082019-131247'
+filename = 'equilibriaData11112019-053507'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 alpha = data[0]
