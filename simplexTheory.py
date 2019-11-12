@@ -1,31 +1,46 @@
-from scipy.optimize import fsolve
+from scipy.optimize import fsolve, root
 import matplotlib.pyplot as plt
 import numpy as np
 
 def solveUniformEquilbrium(gamma, betaList, alpha, minK, maxK, digits=4):
     initialGuesses = np.linspace(0, 1, 2)
-    equilibriumV = list()
+    averageInfected = list()
     for beta in betaList:
         roots = list()
         for initialGuess in initialGuesses:
             root, data, ier, msg = fsolve(uniformEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, minK, maxK), full_output=True)
-            if ier == 1 and round(np.asscalar(root), digits) not in set(roots):
-
-                roots.append(round(np.asscalar(root), digits))
-        equilibriumV.append(roots)
-    return equilibriumV
+            if ier == 1:
+                avgInfectionPt = round(calculateAvgInfected(np.asscalar(root), gamma, beta, alpha, minK, maxK), digits)
+                if avgInfectionPt not in set(roots):
+                    roots.append(avgInfectionPt)
+        averageInfected.append(roots)
+    return averageInfected
 
 def solvePowerLawEquilbrium(gamma, betaList, alpha, minK, maxK, r, digits=4):
     initialGuesses = np.linspace(0, 1, 2)
-    equilibriumV = list()
+    averageInfected = list()
     for beta in betaList:
         roots = list()
         for initialGuess in initialGuesses:
             root, data, ier, msg = fsolve(powerLawEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, minK, maxK, r), full_output=True)
-            if ier == 1 and round(np.asscalar(root), digits) not in set(roots):
-                roots.append(round(np.asscalar(root), digits))
-        equilibriumV.append(roots)
-    return equilibriumV
+            if ier == 1:
+                avgInfectionPt = round(calculateAvgInfected(np.asscalar(root), gamma, beta, alpha, minK, maxK), digits)
+                if avgInfectionPt not in set(roots):
+                    roots.append(avgInfectionPt)
+        averageInfected.append(roots)
+    return averageInfected
+
+def solveIndependentEquilbrium(gamma, betaList, alpha, minK, maxK, r, digits=4):
+    initialGuesses = [[0, 0], [0.5, 0.5], [1, 1]]
+    averageInfected = list()
+    for beta in betaList:
+        roots = list()
+        for initialGuess in initialGuesses:
+            result = root(independentEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, minK, maxK, r))
+            if result.success and round(np.asscalar(result.x[0]), digits) not in set(roots):
+                roots.append(round(np.asscalar(result.x[0]), digits))
+        averageInfected.append(roots)
+    return averageInfected
 
 def uniformEquilibriumFunction(V, gamma, beta, alpha, minK, maxK):
     avgK = 0.5*(minK+maxK)
@@ -36,12 +51,38 @@ def uniformEquilibriumFunction(V, gamma, beta, alpha, minK, maxK):
     return frac/avgK*sum - 1
 
 def powerLawEquilibriumFunction(V, gamma, beta, alpha, minK, maxK, r):
-    # Add this calculation
     avgK = avgOfPowerLaw(minK, maxK, r)
     sum = 0
     for k in range(minK, maxK+1):
         sum = sum + truncatedPowerLaw(k, minK, maxK, r)*k**2*(beta + alpha*V)/(gamma + beta*k*V + alpha*k*V**2)
     return 1/avgK*sum - 1
+
+def independentEquilibriumFunction(vars, gamma, beta, alpha, minK, maxK, r, networkDist="power-law"):
+    # Add this calculation
+    U = vars[0]
+    V = vars[1]
+    if networkDist == "power-law":
+        avgK = avgOfPowerLaw(minK, maxK, r)
+        sumV = 0
+        sumU = 0
+        for k in range(minK, maxK+1):
+            sumU = sumU + truncatedPowerLaw(k, minK, maxK, r)*(k*beta*V + alpha*avgK*U**2)/(gamma + beta*k*V + alpha*avgK*U**2)
+            sumV = sumV + truncatedPowerLaw(k, minK, maxK, r)*k*(k*beta*V + alpha*avgK*U**2)/(gamma + beta*k*V + alpha*avgK*U**2)
+
+        return [sumU-U, 1/avgK*sumV - V]
+    elif networkDist == "uniform":
+        avgK = 0.5*(minK + maxK)
+        frac = 1/(maxK-minK+1)
+        sumV = 0
+        sumU = 0
+        for k in range(minK, maxK+1):
+            sumU = sumU + (k*beta*V + alpha*avgK*U**2)/(gamma + beta*k*V + alpha*avgK*U**2)
+            sumV = sumV + k*(k*beta*V + alpha*avgK*U**2)/(gamma + beta*k*V + alpha*avgK*U**2)
+
+        return [frac*sumU-U, frac/avgK*sumV - V]
+    else:
+        print("invalid choice")
+        return
 
 def calculateAvgInfected(V, gamma, beta, alpha, minK, maxK):
     frac = 1/(maxK-minK+1)
