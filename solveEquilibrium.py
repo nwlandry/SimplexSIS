@@ -16,7 +16,7 @@ plt.plot(beta, equilibria[-6], 'o-', label=r"$\alpha=$"+str(alpha[-1]))
 
 
 gamma = 2
-alpha = 0.075
+alpha = alpha[-6]
 minK = 50
 maxK = 100
 avgK = 75
@@ -28,7 +28,7 @@ print(betaCrit)
 digitsOfPrecision = 5
 
 #averageInfected = simplexTheory.solveUniformEquilbrium(gamma, betaList, alpha, minK, maxK, digitsOfPrecision)
-maxK = 500
+maxK = 1000
 r = 4
 
 #averageInfected = simplexTheory.solvePowerLawEquilbrium(gamma, betaList, alpha, minK, maxK, r, digitsOfPrecision)
