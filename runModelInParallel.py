@@ -15,9 +15,9 @@ k0 = 50
 r = 4 # power law exponent
 minDeg = 50
 maxDeg = 100
-n = 10000
+n = 100
 simplexSize = 3
-isIndependentUniform = False
+isIndependentUniform = True
 degreeDistType = "power-law"
 
 # Epidemic parameters
@@ -55,7 +55,7 @@ print(kCubedAvg)
 
 #Generate simplex list
 if isIndependentUniform:
-    [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, int(kAvg)*n, simplexSize)
+    [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, int(round(kAvg))*n, simplexSize)
     # epidemic parameters
     gamma = 2
     betaCrit = kAvg/kSquaredAvg*gamma
@@ -67,7 +67,6 @@ else:
     gamma = 2
     betaCrit = kAvg/kSquaredAvg*gamma
     alphaCrit = (kAvg**2)*kCubedAvg/(kSquaredAvg**3)*gamma
-
 
 
 print("beta critical is " + str(betaCrit))
