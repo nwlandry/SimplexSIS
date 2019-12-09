@@ -18,7 +18,7 @@ maxDeg = 100
 n = 100
 simplexSize = 3
 isIndependentUniform = True
-degreeDistType = "power-law"
+degreeDistType = "poisson"
 
 # Epidemic parameters
 initialFraction = 0.5
@@ -30,11 +30,12 @@ dt = 0.1
 avgLength = int(0.4*timesteps)
 numBetaPts = 31
 numAlphaPts = 8
-startAlphaCritFraction = 0.5
+startAlphaCritFraction = 0
 endAlphaCritFraction = 4
 startBetaCritFraction = 0.5
 endBetaCritFraction = 1.5
 numProcesses = numAlphaPts
+meanDegree = 20
 
 
 # generate degree sequence and adjacency matrix
@@ -42,6 +43,8 @@ if degreeDistType == "uniform":
     k = simplexUtilities.generateUniformDegreeSequence(n, minDeg, maxDeg)
 elif degreeDistType == "power-law":
     k = simplexUtilities.generatePowerLawDegreeSequence(n, k0, n, r)
+elif degreeDistType == "poisson":
+    k = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
 
 A = simplexUtilities.generateConfigModelAdjacency(k)
 
@@ -49,13 +52,17 @@ A = simplexUtilities.generateConfigModelAdjacency(k)
 kAvg = simplexUtilities.avgPowerK(A.sum(axis=0), 1)
 kSquaredAvg =  simplexUtilities.avgPowerK(A.sum(axis=0), 2)
 kCubedAvg =  simplexUtilities.avgPowerK(A.sum(axis=0), 3)
+kAvgSimplex = 6
+
 print(kAvg)
 print(kSquaredAvg)
 print(kCubedAvg)
 
+
 #Generate simplex list
 if isIndependentUniform:
-    [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, int(round(kAvg))*n, simplexSize)
+    #[simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, int(kAvg*n), simplexSize)
+    [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, int(kAvgSimplex*n), simplexSize)
     # epidemic parameters
     gamma = 2
     betaCrit = kAvg/kSquaredAvg*gamma
@@ -82,4 +89,4 @@ end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 
 with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([alpha, beta, equilibria], file)
+    pickle.dump([alpha, beta, gamma, kAvg, kAvgSimplex, equilibria], file)

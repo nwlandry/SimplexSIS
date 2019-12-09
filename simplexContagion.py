@@ -15,24 +15,28 @@ def microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, a
         if averageX[i] == 0:
             X[random.randrange(n)] = 1
 
-        u = np.random.uniform(size=n)
-        infectByNeighbors = 1-np.power(1-beta*dt, A*X)
+        # u = np.random.uniform(size=n)
+        # v = np.random.uniform(size=n)
+        pInfectByNeighbors = 1-np.power(1-beta*dt, A*X)
         for j in range(n):
             if X[j]==1:
                 # heal
-                X[j] = u[j] > gamma*dt
+                X[j] = random.random() > gamma*dt
             else:
-                # simplexNeighbors = findSimplexNeighbors(simplexList, j)
-                numInfectedSimplices = 0
-                # for simplex in simplexNeighbors:
-                #     if sum([X[member] for member in simplex]) >= 2:
-                #         numInfectedSimplices = numInfectedSimplices + 1
-                for index in simplexIndices[j]:
-                    if sum([X[member] for member in simplexList[index]]) >= 2:
-                        numInfectedSimplices = numInfectedSimplices + 1
-                infectBySimplex = 1-(1-alpha*dt)**numInfectedSimplices
-                # P(A U B)
-                X[j] = u[j] <= infectByNeighbors[j]+infectBySimplex - infectByNeighbors[j]*infectBySimplex
+                if random.random() <= pInfectByNeighbors[j]:
+                    # infect by neighbor
+                    X[j] = 1
+                else:
+                    # don't run if there is zero contribution from simplices
+                    if alpha > 0:
+                        # infect by simplex
+                        numInfectedSimplices = 0
+                        for index in simplexIndices[j]:
+                            if sum([X[member] for member in simplexList[index]]) >= 2:
+                                numInfectedSimplices = numInfectedSimplices + 1
+                        pInfectBySimplex = 1-(1-alpha*dt)**numInfectedSimplices
+                        if random.random() <= pInfectBySimplex:
+                            X[j] = 1
 
     averageX[-1] = np.mean(X)
     return averageX, X

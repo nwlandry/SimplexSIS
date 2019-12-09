@@ -26,6 +26,9 @@ def generateUniformDegreeSequence(numPoints, min, max):
         k.append(round(u))
     return k
 
+def generatePoissonDegreeSequence(numPoints, meanDegree):
+    return np.random.poisson(lam=meanDegree, size=numPoints).tolist()
+
 
 def generateChungLuAdjacency(kIn, kOut, n):
     avgK = sum(kIn)/len(kIn)

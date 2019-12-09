@@ -5,27 +5,33 @@ import simplexUtilities
 import simplexContagion
 
 
-filename = 'equilibriaData11142019-135704'
+filename = 'equilibriaData12042019-233651'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 alpha = data[0]
 beta = data[1]
-equilibria = data[2]
+gamma = data[2]
+kAvg = data[3]
+kAvgSimplex = data[4]
+equilibria = data[5]
+
+lambdaNetwork = [b*kAvg/gamma for b in beta]
+lambdaSimplex = [a*kAvgSimplex/gamma for a in alpha]
 plt.figure()
 for i in range(len(equilibria)):
-    plt.plot(beta, equilibria[i], 'o-', label=r"$\alpha=$" + str(round(alpha[i],3)))
-plt.legend(loc='lower right')
-plt.xlabel(r"$\beta$")
+    plt.plot(lambdaNetwork, equilibria[i], 'o-', label=r"$\lambda_{\alpha}=$" + str(round(lambdaSimplex[i],3)))
+plt.legend(loc='lower left')
+plt.xlabel(r"$\lambda$")
 plt.ylabel("Fraction infected")
 plt.ylim([0,1])
 plt.show()
 
 hysteresis = []
-for i in range(len(alpha)):
-    hysteresis.append(simplexContagion.calculateHysteresis(equilibria[i], beta, option='infinity'))
+for i in range(len(lambdaSimplex)):
+    hysteresis.append(simplexContagion.calculateHysteresis(equilibria[i], lambdaNetwork, option='infinity'))
 
 plt.figure()
-plt.plot(alpha, hysteresis, 'o-')
-plt.xlabel(r"$\alpha$")
+plt.plot(lambdaSimplex, hysteresis, 'o-')
+plt.xlabel(r"$\lambda_{\alpha}$")
 plt.ylabel("Hysteresis")
 plt.show()
