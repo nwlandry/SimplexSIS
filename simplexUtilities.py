@@ -4,7 +4,7 @@ from scipy.sparse import csr_matrix
 import numpy as np
 import multiprocessing as mp
 
-def avgPowerK(k, power):
+def meanPowerOfDegree(k, power):
     return np.asscalar(np.power(k, power).mean())
 
 def invCDF(u, k0, n, exponent):
@@ -31,7 +31,7 @@ def generatePoissonDegreeSequence(numPoints, meanDegree):
 
 
 def generateChungLuAdjacency(kIn, kOut, n):
-    avgK = sum(kIn)/len(kIn)
+    meanDegree = sum(kIn)/len(kIn)
     if len(kIn)!=n or len(kOut)!=n:
         return
 
@@ -41,7 +41,7 @@ def generateChungLuAdjacency(kIn, kOut, n):
     for i in range(n):
         for j in range(n):
             u = random.uniform(0, 1)
-            if u < min(kIn[i]*kOut[j]/(n*avgK), 1):
+            if u < min(kIn[i]*kOut[j]/(n*meanDegree), 1):
                 rowIndex.append(i)
                 columnIndex.append(j)
                 weights.append(1)
@@ -107,7 +107,8 @@ def generateConfigModelSimplexList(degreeSequence, simplexSize):
     return simplexList, simplexIndices
 
 
-def generateUniformSimplexList(n, numSimplices, simplexSize):
+def generateUniformSimplexList(n, meanSimplexDegree, simplexSize):
+    numSimplices = int(meanSimplexDegree*n/simplexSize)
     simplexIndices = [[] for i in range(n)]
     simplexList = []
     for i in range(numSimplices):

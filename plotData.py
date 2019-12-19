@@ -5,7 +5,7 @@ import simplexUtilities
 import simplexContagion
 
 
-filename = 'equilibriaData12042019-233651'
+filename = 'equilibriaData12162019-155917'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 alpha = data[0]
@@ -20,7 +20,7 @@ lambdaSimplex = [a*kAvgSimplex/gamma for a in alpha]
 plt.figure()
 for i in range(len(equilibria)):
     plt.plot(lambdaNetwork, equilibria[i], 'o-', label=r"$\lambda_{\alpha}=$" + str(round(lambdaSimplex[i],3)))
-plt.legend(loc='lower left')
+plt.legend(loc='lower right')
 plt.xlabel(r"$\lambda$")
 plt.ylabel("Fraction infected")
 plt.ylim([0,1])
