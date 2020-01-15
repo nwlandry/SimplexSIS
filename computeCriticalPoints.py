@@ -5,14 +5,12 @@ import simplexUtilities
 import simplexContagion
 
 # graph parameters
-k0 = 50
-r = 2 # power law exponent
-minDeg = 50
-maxDeg = 100
-n = 1000
-simplexSize = 3
-isIndependentUniform = False
-degreeDistType = "uniform"
+k0 = 10
+r = 3 # power law exponent
+minDeg = 10
+maxDeg = 10000
+n = 10000
+degreeDistType = "power-law"
 gamma = 2
 
 # generate degree sequence and adjacency matrix
@@ -21,14 +19,14 @@ if degreeDistType == "uniform":
 elif degreeDistType == "power-law":
     k = simplexUtilities.generatePowerLawDegreeSequence(n, k0, n, r)
 
-A = simplexUtilities.generateConfigModelAdjacency(k)
-
 # Calculate critical values
-kAvg = simplexUtilities.avgPowerK(A.sum(axis=0), 1)
-kSquaredAvg =  simplexUtilities.avgPowerK(A.sum(axis=0), 2)
-kCubedAvg =  simplexUtilities.avgPowerK(A.sum(axis=0), 3)
-
-alphaCritIndep = kCubedAvg/kAvg**4*gamma
-alphaCritDependent = kAvg**2*kCubedAvg/kSquaredAvg**3*gamma
+meanDegree = simplexUtilities.meanPowerOfDegree(k, 1)
+meanSquaredDegree =  simplexUtilities.meanPowerOfDegree(k, 2)
+meanCubedDegree =  simplexUtilities.meanPowerOfDegree(k, 3)
+print(meanDegree)
+print(meanSquaredDegree)
+print(meanCubedDegree)
+alphaCritIndep = meanCubedDegree/(meanDegree**4)*gamma
+alphaCritDependent = (meanDegree**2)*meanCubedDegree/(meanSquaredDegree**3)*gamma
 print("The alpha critical for independent uniformly chosen simplices is " + str(alphaCritIndep))
 print("The alpha critical for simplices correlated to degree is " + str(alphaCritDependent))

@@ -11,32 +11,33 @@ import time
 import multiprocessing as mp
 
 # graph parameters
-k0 = 50
+k0 = 13.33557834
 r = 4 # power law exponent
-minDeg = 50
-maxDeg = 100
+minDeg = 10
+maxDeg = 30
 n = 10000
 simplexSize = 3
 isIndependentUniform = True
-degreeDistType = "poisson"
+degreeDistType = "power-law"
+meanSimplexDegree = 20
+meanDegree = 20
 
 # Epidemic parameters
-initialFraction = 0.5
+initialFraction = 0.01
 x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
 
 #simulation parameters
 timesteps = 6000
-dt = 1
+dt = 0.1
 # length over which to average
 avgLength = int(0.1*timesteps)
 numBetaPts = 31
-numAlphaPts = 8
+numAlphaPts = 9
 startAlphaCritFraction = 0
-endAlphaCritFraction = 4
-startBetaCritFraction = 0.5
+endAlphaCritFraction = 2
+startBetaCritFraction = 0
 endBetaCritFraction = 1.5
 numProcesses = numAlphaPts
-meanDegree = 20
 
 
 # generate degree sequence and adjacency matrix
@@ -49,11 +50,10 @@ elif degreeDistType == "poisson":
 
 A = simplexUtilities.generateConfigModelAdjacency(k)
 
-# Calculate critical values
+# Calculate values needed in critical value calculation
 meanDegree = simplexUtilities.meanPowerOfDegree(A.sum(axis=0), 1)
 meanSquaredDegree =  simplexUtilities.meanPowerOfDegree(A.sum(axis=0), 2)
 meanCubedDegree =  simplexUtilities.meanPowerOfDegree(A.sum(axis=0), 3)
-meanSimplexDegree = 6
 
 print("The mean degree is {:.2f}".format(meanDegree))
 print("The mean squared degree is {:.2f}".format(meanSquaredDegree))
@@ -82,14 +82,14 @@ else:
 print("beta critical is " + str(betaCrit))
 print("alpha critical is " + str(alphaCrit))
 
-# beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFraction*betaCrit, numBetaPts),
-#                       np.linspace(betaCrit*(endBetaCritFraction-(endBetaCritFraction-startBetaCritFraction)/(numBetaPts-1)), startBetaCritFraction*betaCrit, numBetaPts-1)])
-# alpha = np.linspace(startAlphaCritFraction*alphaCrit, endAlphaCritFraction*alphaCrit, numAlphaPts)
-#
-# start = time.time()
-# equilibria = simplexContagion.generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numProcesses)
-# end = time.time()
-# print('The elapsed time is ' + str(end-start) + 's')
-#
-# with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-#     pickle.dump([alpha, beta, gamma, meanDegree, meanSimplexDegree, equilibria], file)
+beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFraction*betaCrit, numBetaPts),
+                      np.linspace(betaCrit*(endBetaCritFraction-(endBetaCritFraction-startBetaCritFraction)/(numBetaPts-1)), startBetaCritFraction*betaCrit, numBetaPts-1)])
+alpha = np.linspace(startAlphaCritFraction*alphaCrit, endAlphaCritFraction*alphaCrit, numAlphaPts)
+
+start = time.time()
+equilibria = simplexContagion.generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numProcesses)
+end = time.time()
+print('The elapsed time is ' + str(end-start) + 's')
+
+with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
+    pickle.dump([gamma, beta, alpha, equilibria, betaCrit, alphaCrit, meanDegree, meanSquaredDegree, meanCubedDegree, meanSimplexDegree], file)
