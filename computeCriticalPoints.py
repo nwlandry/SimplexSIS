@@ -6,9 +6,9 @@ import simplexContagion
 
 # graph parameters
 k0 = 10
-r = 3 # power law exponent
+r = 4 # power law exponent
 minDeg = 10
-maxDeg = 10000
+maxDeg = 1000
 n = 10000
 degreeDistType = "power-law"
 gamma = 2

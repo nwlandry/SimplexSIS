@@ -16,7 +16,7 @@ kAvgSimplex = data[4]
 equilibria = data[5]
 alphaCrit = data[6]
 betaCrit = data[7]
-
+print(alphaCrit)
 plt.figure()
 for i in range(len(equilibria)):
     plt.plot(beta, equilibria[i], 'o-', label=r"$\lambda_{\alpha}=$" + str(round(alpha[i],3)))

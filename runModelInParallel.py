@@ -42,13 +42,13 @@ numProcesses = numAlphaPts
 
 # generate degree sequence and adjacency matrix
 if degreeDistType == "uniform":
-    k = simplexUtilities.generateUniformDegreeSequence(n, minDeg, maxDeg)
+    degreeSequence = simplexUtilities.generateUniformDegreeSequence(n, minDeg, maxDeg)
 elif degreeDistType == "power-law":
-    k = simplexUtilities.generatePowerLawDegreeSequence(n, k0, n, r)
+    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, k0, n, r)
 elif degreeDistType == "poisson":
-    k = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
+    degreeSequence = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
 
-A = simplexUtilities.generateConfigModelAdjacency(k)
+A = simplexUtilities.generateConfigModelAdjacency(degreeSequence)
 
 # Calculate values needed in critical value calculation
 meanDegree = simplexUtilities.meanPowerOfDegree(A.sum(axis=0), 1)
@@ -73,7 +73,7 @@ if isIndependentUniform:
     alphaCrit = meanCubedDegree/(meanDegree**3 * meanSimplexDegree)*gamma
 
 else:
-    [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(k, simplexSize)
+    [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(degreeSequence, simplexSize)
     # epidemic parameters
     gamma = 2
     betaCrit = meanDegree/meanSquaredDegree*gamma
