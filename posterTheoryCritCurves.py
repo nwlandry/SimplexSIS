@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import fsolve
 
-powers = np.linspace(3.001,6,100)
+powers = np.linspace(4.001,6,100)
 alphaCrit = list()
 indepAlphaCrit = list()
 n = 10000
-meanDegreeTarget = 20
+meanDegreeTarget = 100
 initialGuess = 0.1
 gamma = 2
 

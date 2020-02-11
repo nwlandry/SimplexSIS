@@ -11,23 +11,22 @@ import time
 import multiprocessing as mp
 
 # graph parameters
-k0 = 13.33557834
 r = 4 # power law exponent
-minDeg = 50
-maxDeg = 150
-n = 2000
+minDegree = 13.35
+maxDegree = 10000
+n = 10000
 simplexSize = 3
-isIndependentUniform = False
-degreeDistType = "uniform"
-meanSimplexDegree = 20
-meanDegree = 20
+isIndependentUniform = True
+degreeDistType = "power-law"
+meanSimplexDegree = 100
+meanDegree = 100
 
 # Epidemic parameters
 initialFraction = 0.01
 x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
 
 #simulation parameters
-timesteps = 2000
+timesteps = 1000
 dt = 0.1
 alphaCritFraction = 1
 betaCritFraction = 1.1
@@ -35,9 +34,9 @@ gamma = 2
 
 # generate degree sequence and adjacency matrix
 if degreeDistType == "uniform":
-    k = simplexUtilities.generateUniformDegreeSequence(n, minDeg, maxDeg)
+    k = simplexUtilities.generateUniformDegreeSequence(n, minDegree, maxDegree)
 elif degreeDistType == "power-law":
-    k = simplexUtilities.generatePowerLawDegreeSequence(n, k0, n, r)
+    k = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, r)
 elif degreeDistType == "poisson":
     k = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
 

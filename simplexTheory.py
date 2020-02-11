@@ -2,116 +2,102 @@ from scipy.optimize import fsolve, root
 import matplotlib.pyplot as plt
 import numpy as np
 
-def solveEquilibrium(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, digits=4, isIndependent=False, type="power-law", r=4):
-    if isIndependent:
-        # return solveIndependentEquilbrium(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r=r, digits=digits, type=type)
-        return solveIndependentEquilbriumExpansion(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r=r, digits=digits, type=type)
-
+def solveEquilibrium(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree=None, degreeSequence=None, isIndependent=False, type="power-law", r=4, digits=4):
+    if degreeSequence is None:
+        degreeHist = generateTheoreticalDegreeHist(minDegree, maxDegree, type, r=r)
     else:
-        return solveDependentEquilbrium(gamma, beta, alpha, minDegree, maxDegree, r=r, digits=digits, type=type)
+        degreeHist = degreeSequenceToHist(degreeSequence)
 
-def solveDependentEquilbrium(gamma, beta, alpha, minDegree, maxDegree, r=4, digits=4, type="power-law"):
+    if meanSimplexDegree is None:
+        meanDegree = generateMeanDegreeFromHist(degreeHist)
+
+    if isIndependent:
+        return solveIndependentEquilbrium(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=digits)
+    else:
+        return solveDependentEquilbrium(gamma, beta, alpha, degreeHist, digits=digits)
+
+def solveDependentEquilbrium(gamma, beta, alpha, degreeHist, digits=4):
     initialGuesses = np.linspace(0, 1, 5)
     roots = list()
+    minDegree = degreeHist[0][0]
+    maxDegree = degreeHist[-1][0]
     for initialGuess in initialGuesses:
-        root, data, ier, msg = fsolve(dependentEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, minDegree, maxDegree, r, type), full_output=True)
+        root, data, ier, msg = fsolve(dependentEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, degreeHist), full_output=True)
         if ier == 1:
             avgInfectionPt = round(calculateAvgInfected(np.asscalar(root), gamma, beta, alpha, minDegree, maxDegree), digits)
             if avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
                 roots.append(avgInfectionPt)
     return roots
 
-def solveIndependentEquilbriumExpansion(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, digits=4, type="power-law"):
-    initialGuesses = np.linspace(0, 1, 5)
+def solveIndependentEquilbrium(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=4):
+    initialGuesses = [[0, 0], [0.1, 0.1], [0.25, 0.25], [0.5, 0.5],[0.75, 0.75], [1, 1]]
     roots = list()
     for initialGuess in initialGuesses:
-        root, data, ier, msg = fsolve(independentExpansionEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, type), full_output=True)
-        if ier == 1:
-            avgInfectionPt = round(calculateAvgInfected(np.asscalar(root), gamma, beta, alpha, minDegree, maxDegree), digits)
-            if avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
-                roots.append(avgInfectionPt)
-    return roots
-
-def solveIndependentEquilbrium(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r=4, digits=4, type="power-law"):
-    initialGuesses = [[0, 0], [0.001, 0.001], [0.25, 0.25], [0.5, 0.5],[0.75, 0.75], [1, 1]]
-    roots = list()
-    for initialGuess in initialGuesses:
-        result = root(independentEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, type))
+        result = root(independentEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree))
         avgInfectionPt = round(np.asscalar(result.x[0]), digits)
         if result.success and avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
             roots.append(avgInfectionPt)
     return roots
 
-def dependentEquilibriumFunction(V, gamma, beta, alpha, minDegree, maxDegree, r, networkDist):
-    if networkDist == "power-law":
-        meanDegree = avgOfPowerLaw(minDegree, maxDegree, r)
-        sum = 0
-        for k in range(minDegree, maxDegree+1):
-            sum = sum + truncatedPowerLaw(k, minDegree, maxDegree, r)*k**2*(beta + alpha*V)/(gamma + beta*k*V + alpha*k*V**2)
-        return 1/meanDegree*sum - 1
 
-    elif networkDist == "uniform":
-        meanDegree = 0.5*(minDegree+maxDegree)
-        frac = 1/(maxDegree-minDegree+1)
-        sum = 0
-        for k in range(minDegree, maxDegree+1):
-            sum = sum + k**2*(beta + alpha*V)/(gamma + beta*k*V + alpha*k*V**2)
-        return frac/meanDegree*sum - 1
+def dependentEquilibriumFunction(V, gamma, beta, alpha, degreeHist):
+    meanDegree = 0
+    sum = 0
+    for degreeInfo in degreeHist:
+        degree = degreeInfo[0]
+        prob = degreeInfo[1]
+        sum = sum + prob*degree**2*(beta + alpha*V)/(gamma + beta*degree*V + alpha*degree*V**2)
+        meanDegree = meanDegree + prob*degree
+    return 1/meanDegree*sum - 1
 
-    else:
-        print("invalid choice")
-        return
-
-def independentExpansionEquilibriumFunction(V, gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, networkDist):
-    if networkDist == "power-law":
-        meanDegree = avgOfPowerLaw(minDegree, maxDegree, r)
-        meanSquaredDegree = meanPowerOfPowerLaw(minDegree, maxDegree, r, 2)
-        c = meanDegree**4*meanSimplexDegree/meanSquaredDegree**2
-        sum = 0
-        for k in range(minDegree, maxDegree+1):
-            sum = sum + truncatedPowerLaw(k, minDegree, maxDegree, r)*k*(k*beta + alpha*c*V)/(gamma + beta*k*V + alpha*c*V**2)
-        return 1/meanDegree*sum - 1
-
-    elif networkDist == "uniform":
-        meanDegree = 0.5*(minDegree+maxDegree)
-        meanSquaredDegree = 1./3*(maxDegree**2+minDegree*maxDegree+minDegree**2)
-        frac = 1/(maxDegree-minDegree+1)
-        c = meanDegree**4*meanSimplexDegree/meanSquaredDegree**2
-        sum = 0
-        for k in range(minDegree, maxDegree+1):
-            sum = sum + k**2*(beta + alpha*c*V)/(gamma + beta*k*V + alpha*c*V**2)
-        return frac/meanDegree*sum - 1
-
-    else:
-        print("invalid choice")
-        return
-
-def independentEquilibriumFunction(vars, gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, networkDist):
+def independentEquilibriumFunction(vars, gamma, beta, alpha, degreeHist, meanSimplexDegree):
     # Add this calculation
     U = vars[0]
     V = vars[1]
-    if networkDist == "power-law":
-        meanDegree = avgOfPowerLaw(minDegree, maxDegree, r)
-        sumV = 0
-        sumU = 0
-        for k in range(minDegree, maxDegree+1):
-            sumU = sumU + truncatedPowerLaw(k, minDegree, maxDegree, r)*(k*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*k*V + alpha*meanSimplexDegree*U**2)
-            sumV = sumV + truncatedPowerLaw(k, minDegree, maxDegree, r)*k*(k*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*k*V + alpha*meanSimplexDegree*U**2)
+    meanDegree = 0
+    sumU = 0
+    sumV = 0
+    for degreeInfo in degreeHist:
+        degree = degreeInfo[0]
+        prob = degreeInfo[1]
+        sumU = sumU + prob*(degree*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + alpha*meanSimplexDegree*U**2)
+        sumV = sumV + prob*degree*(degree*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + alpha*meanSimplexDegree*U**2)
+        meanDegree = meanDegree + prob*degree
 
-        return [sumU-U, 1/meanDegree*sumV - V]
-    elif networkDist == "uniform":
-        meanDegree = 0.5*(minDegree + maxDegree)
-        frac = 1/(maxDegree-minDegree+1)
-        sumV = 0
-        sumU = 0
-        for k in range(minDegree, maxDegree+1):
-            sumU = sumU + (k*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*k*V + alpha*meanSimplexDegree*U**2)
-            sumV = sumV + k*(k*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*k*V + alpha*meanSimplexDegree*U**2)
+    return [sumU-U, 1/meanDegree*sumV - V]
 
-        return [frac*sumU-U, frac/meanDegree*sumV - V]
-    else:
-        print("invalid choice")
-        return
+def degreeSequenceToHist(degreeSequence):
+    degreeHist = list()
+    sortedDegreeSequence = sorted(degreeSequence)
+    n = len(degreeSequence)
+    currentDegree = 0
+    for degree in sortedDegreeSequence:
+        if degree != currentDegree:
+            currentDegree = degree
+            degreeHist.append([degree, 1])
+        else:
+            degreeHist[-1][1] = degreeHist[-1][1] + 1
+    for i in range(len(degreeHist)):
+        degreeHist[i][1] = degreeHist[i][1]/n
+    return degreeHist
+
+def generateTheoreticalDegreeHist(minDegree, maxDegree, networkDist, r=4):
+    degreeHist = list()
+    for degree in range(minDegree, maxDegree+1):
+        if networkDist == "power-law":
+            prob = truncatedPowerLaw(degree, minDegree, maxDegree, r)
+        elif networkDist == "uniform":
+            prob = 1.0/(maxDegree-minDegree+1)
+        else:
+            print("Not a valid option")
+        degreeHist.append([degree, prob])
+    return degreeHist
+
+def computeMeanDegreeFromHist(hist):
+    meanDegree = 0
+    for item in hist:
+        meanDegree = meanDegree + item[0]*item[1]
+    return meanDegree
 
 def calculateAvgInfected(V, gamma, beta, alpha, minDegree, maxDegree):
     frac = 1/(maxDegree-minDegree+1)
@@ -179,6 +165,86 @@ def findHysteresisBoundaries(gamma, betaList, alphaList, minDegree, maxDegree, m
     return leftBoundary, rightBoundary, alphaHys
 
 ### Additional functions
+
+def solveEquilibriumOld(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, digits=4, isIndependent=False, type="power-law", r=4):
+    if isIndependent:
+        return solveIndependentEquilbriumOld(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r=r, digits=digits, type=type)
+        #return solveIndependentEquilbriumExpansion(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r=r, digits=digits, type=type)
+
+    else:
+        print("Test")
+        return solveDependentEquilbriumOld(gamma, beta, alpha, minDegree, maxDegree, r=r, digits=digits, type=type)
+
+
+
+def solveDependentEquilbriumOld(gamma, beta, alpha, minDegree, maxDegree, r=4, digits=4, type="power-law"):
+    initialGuesses = np.linspace(0, 1, 5)
+    roots = list()
+    for initialGuess in initialGuesses:
+        root, data, ier, msg = fsolve(dependentEquilibriumFunctionOld, initialGuess,  args=(gamma, beta, alpha, minDegree, maxDegree, r, type), full_output=True)
+        if ier == 1:
+            avgInfectionPt = round(calculateAvgInfected(np.asscalar(root), gamma, beta, alpha, minDegree, maxDegree), digits)
+            if avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
+                roots.append(avgInfectionPt)
+    return roots
+
+def solveIndependentEquilbriumOld(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r=4, digits=4, type="power-law"):
+    initialGuesses = [[0, 0], [0.001, 0.001], [0.25, 0.25], [0.5, 0.5],[0.75, 0.75], [1, 1]]
+    roots = list()
+    for initialGuess in initialGuesses:
+        result = root(independentEquilibriumFunctionOld, initialGuess,  args=(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, type))
+        avgInfectionPt = round(np.asscalar(result.x[0]), digits)
+        if result.success and avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
+            roots.append(avgInfectionPt)
+    return roots
+
+def dependentEquilibriumFunctionOld(V, gamma, beta, alpha, minDegree, maxDegree, r, networkDist):
+    if networkDist == "power-law":
+        meanDegree = avgOfPowerLaw(minDegree, maxDegree, r)
+        sum = 0
+        for k in range(minDegree, maxDegree+1):
+            sum = sum + truncatedPowerLaw(k, minDegree, maxDegree, r)*k**2*(beta + alpha*V)/(gamma + beta*k*V + alpha*k*V**2)
+        return 1/meanDegree*sum - 1
+
+    elif networkDist == "uniform":
+        meanDegree = 0.5*(minDegree+maxDegree)
+        frac = 1/(maxDegree-minDegree+1)
+        sum = 0
+        for k in range(minDegree, maxDegree+1):
+            sum = sum + k**2*(beta + alpha*V)/(gamma + beta*k*V + alpha*k*V**2)
+        return frac/meanDegree*sum - 1
+
+    else:
+        print("invalid choice")
+        return
+
+def independentEquilibriumFunctionOld(vars, gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, networkDist):
+    # Add this calculation
+    U = vars[0]
+    V = vars[1]
+    if networkDist == "power-law":
+        meanDegree = avgOfPowerLaw(minDegree, maxDegree, r)
+        sumV = 0
+        sumU = 0
+        for k in range(minDegree, maxDegree+1):
+            sumU = sumU + truncatedPowerLaw(k, minDegree, maxDegree, r)*(k*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*k*V + alpha*meanSimplexDegree*U**2)
+            sumV = sumV + truncatedPowerLaw(k, minDegree, maxDegree, r)*k*(k*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*k*V + alpha*meanSimplexDegree*U**2)
+
+        return [sumU-U, 1/meanDegree*sumV - V]
+    elif networkDist == "uniform":
+        meanDegree = 0.5*(minDegree + maxDegree)
+        frac = 1/(maxDegree-minDegree+1)
+        sumV = 0
+        sumU = 0
+        for k in range(minDegree, maxDegree+1):
+            sumU = sumU + (k*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*k*V + alpha*meanSimplexDegree*U**2)
+            sumV = sumV + k*(k*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*k*V + alpha*meanSimplexDegree*U**2)
+
+        return [frac*sumU-U, frac/meanDegree*sumV - V]
+    else:
+        print("invalid choice")
+        return
+
 def solveUniformEquilbrium(gamma, beta, alpha, minDegree, maxDegree, digits=4):
     initialGuesses = np.linspace(0, 1, 5)
     roots = list()
@@ -216,3 +282,39 @@ def powerLawEquilibriumFunction(V, gamma, beta, alpha, minDegree, maxDegree, r):
     for k in range(minDegree, maxDegree+1):
         sum = sum + truncatedPowerLaw(k, minDegree, maxDegree, r)*k**2*(beta + alpha*V)/(gamma + beta*k*V + alpha*k*V**2)
     return 1/meanDegree*sum - 1
+
+def solveIndependentEquilbriumExpansion(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, digits=4, type="power-law"):
+    initialGuesses = np.linspace(0, 1, 5)
+    roots = list()
+    for initialGuess in initialGuesses:
+        root, data, ier, msg = fsolve(independentExpansionEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, type), full_output=True)
+        if ier == 1:
+            avgInfectionPt = round(calculateAvgInfected(np.asscalar(root), gamma, beta, alpha, minDegree, maxDegree), digits)
+            if avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
+                roots.append(avgInfectionPt)
+    return roots
+
+
+def independentExpansionEquilibriumFunction(V, gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, r, networkDist):
+    if networkDist == "power-law":
+        meanDegree = avgOfPowerLaw(minDegree, maxDegree, r)
+        meanSquaredDegree = meanPowerOfPowerLaw(minDegree, maxDegree, r, 2)
+        c = meanDegree**4*meanSimplexDegree/meanSquaredDegree**2
+        sum = 0
+        for k in range(minDegree, maxDegree+1):
+            sum = sum + truncatedPowerLaw(k, minDegree, maxDegree, r)*k*(k*beta + alpha*c*V)/(gamma + beta*k*V + alpha*c*V**2)
+        return 1/meanDegree*sum - 1
+
+    elif networkDist == "uniform":
+        meanDegree = 0.5*(minDegree+maxDegree)
+        meanSquaredDegree = 1./3*(maxDegree**2+minDegree*maxDegree+minDegree**2)
+        frac = 1/(maxDegree-minDegree+1)
+        c = meanDegree**4*meanSimplexDegree/meanSquaredDegree**2
+        sum = 0
+        for k in range(minDegree, maxDegree+1):
+            sum = sum + k**2*(beta + alpha*c*V)/(gamma + beta*k*V + alpha*c*V**2)
+        return frac/meanDegree*sum - 1
+
+    else:
+        print("invalid choice")
+        return

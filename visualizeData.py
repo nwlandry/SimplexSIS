@@ -2,23 +2,35 @@ import matplotlib.pyplot as plt
 import numpy as np
 import simplexTheory
 
-def plotTheoreticalInfectionCurves(gamma, beta, alpha, minK, maxK, meanSimplexDegree, digits=4, isIndependent=False, type="power-law", r=4):
+def plotTheoreticalInfectionCurves(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=False, type="power-law", r=4, digits=4):
     plt.figure()
     for betaVal in beta[0:int((len(beta)+1)/2)]:
-        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minK, maxK, meanSimplexDegree, digits, isIndependent, type, r)
+        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=degreeSequence, isIndependent=isIndependent, type=type, r=r, digits=digits)
         for root in roots:
             plt.scatter(betaVal, root, color='black')
+
+    # for betaVal in beta[0:int((len(beta)+1)/2)]:
+    #     roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=isIndependent, type=type, r=r, digits=digits)
+    #     for root in roots:
+    #         plt.scatter(betaVal, root, color='red')
 
     plt.xlabel(r'$\beta$')
     plt.ylabel('infected average')
     plt.show()
 
-def plotTheoreticalAndSimInfectionCurves(equilibrium, gamma, beta, alpha, minK, maxK, meanSimplexDegree, digits=4, isIndependent=False, type="power-law", r=4):
+def plotTheoreticalAndSimInfectionCurves(equilibrium, gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=False, type="power-law", r=4, numTheoryPoints=50, digits=4):
     plt.figure()
-    for betaVal in beta[0:int((len(beta)+1)/2)]:
-        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minK, maxK, meanSimplexDegree, digits, isIndependent, type, r)
+    betaTheory = np.linspace(min(beta), max(beta), numTheoryPoints)
+    for betaVal in betaTheory:
+        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=degreeSequence, isIndependent=isIndependent, type=type, r=r, digits=digits)
+        #roots = simplexTheory.solveEquilibriumOld(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, digits=4, isIndependent=isIndependent, type="power-law", r=4)
         for root in roots:
             plt.scatter(betaVal, root, color='black')
+
+    for betaVal in beta[0:int((len(beta)+1)/2)]:
+        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=isIndependent, type=type, r=r, digits=digits)
+        for root in roots:
+            plt.scatter(betaVal, root, color='red')
 
     plt.plot(beta, equilibrium, 'o-', color='blue')
     plt.xlabel(r'$\beta$')

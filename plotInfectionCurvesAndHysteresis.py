@@ -5,21 +5,24 @@ import simplexUtilities
 import simplexContagion
 
 
-filename = 'equilibriaData12262019-000110'
+filename = 'equilibriaData02092020-141544'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
-alpha = data[0]
+gamma = data[0]
 beta = data[1]
-gamma = data[2]
-kAvg = data[3]
-kAvgSimplex = data[4]
-equilibria = data[5]
-alphaCrit = data[6]
-betaCrit = data[7]
+alpha = data[2]
+equilibria = data[3]
+betaCrit = data[4]
+alphaCrit = data[5]
+meanDegree = data[6]
+meanSquaredDegree = data[7]
+meanCubedDegree = data[8]
+meanSimplexDegree = data[9]
+
 print(alphaCrit)
 plt.figure()
 for i in range(len(equilibria)):
-    plt.plot(beta, equilibria[i], 'o-', label=r"$\lambda_{\alpha}=$" + str(round(alpha[i],3)))
+    plt.plot(beta, equilibria[i], 'o-', label=r"$\alpha=$" + str(round(alpha[i],3)))
 plt.legend(loc='lower right')
 plt.xlabel(r"$\beta$")
 plt.ylabel("Fraction infected")
