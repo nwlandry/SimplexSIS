@@ -10,7 +10,7 @@ from simplexTheory import *
 #filename = 'Poster/uniform_indep'
 #filename = 'equilibriaData12262019-000110'
 #filename = 'Poster/power-law_r=4_indep'
-filename = 'equilibriaData02092020-141544'
+filename = 'equilibriaData_power-law_r=4_final'
 #filename = 'Archive-Data/equilibriaData10252019-225011'
 #filename = 'Archive-Data/equilibriaData11112019-002636'
 with open(filename, 'rb') as file:
@@ -33,15 +33,15 @@ degreeSequence = data[10]
 # equilibria = data[5]
 
 minDegree = 67
-maxDegree = 450
+maxDegree = 150
 isIndependent = True
 type = "power-law"
 meanSimplexDegree = 100
 r = 4.001
 digits = 5
 
-index = 20
-print(alpha[index])
+index = 0
+print(alpha)
 
 #alphaCrit = meanPowerOfPowerLaw(minDegree, maxDegree, r, 3)/(meanPowerOfPowerLaw(minDegree, maxDegree, r, 1)**4)*gamma
 #print(alphaCrit)

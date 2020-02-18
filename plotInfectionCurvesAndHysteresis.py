@@ -2,10 +2,10 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import simplexUtilities
-import simplexContagion
+import visualizeData
 
 
-filename = 'equilibriaData02092020-141544'
+filename = 'equilibriaData_power-law_r=4_dep_final'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 gamma = data[0]
@@ -31,11 +31,11 @@ plt.show()
 
 hysteresis = []
 for i in range(len(alpha)):
-    hysteresis.append(simplexContagion.calculateHysteresis(equilibria[i], beta, option='infinity'))
+    hysteresis.append(visualizeData.calculateHysteresis(equilibria[i], beta, option='infinity'))
 
 plt.figure()
 plt.plot(alpha, hysteresis, 'o-', label="Hysteresis")
-plt.scatter(alphaCrit, 0, s=50, label=r"$\alpha_{crit}$",  facecolors='none', edgecolors='red')
+#plt.scatter(alphaCrit, 0, s=50, label=r"$\alpha_{crit}$",  facecolors='none', edgecolors='red')
 plt.xlabel(r"$\alpha$")
 plt.ylabel("Hysteresis")
 plt.legend(loc="lower right")

@@ -127,7 +127,6 @@ def generateSISEquilibria(A, simplexList, simplexIndices, gamma, beta, alpha, x0
                 print('alpha='+str(alpha[i])+', beta='+str(beta[j]), flush=True)
     return equilibria
 
-
 def generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numProcesses):
     argList = []
     for alphaVal in alpha:
@@ -137,7 +136,6 @@ def generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, bet
 
     return equilibria
 
-
 def runOneCurve(A, simplexList, simplexIndices, gamma, beta, alpha, x, timesteps, dt, avgLength, verbose=True):
     equilibria = []
     for i in range(len(beta)):
@@ -146,83 +144,3 @@ def runOneCurve(A, simplexList, simplexIndices, gamma, beta, alpha, x, timesteps
         if verbose:
             print('alpha='+str(alpha)+', beta='+str(beta[i]), flush=True)
     return equilibria
-
-
-def calculateHysteresis(equilibrium, beta, option='area'):
-    # These depend on there being an odd number of points
-
-    if option == 'area':
-        sumLower = 0
-        sumUpper = 0
-        for i in range(int((len(equilibrium)+1)/2)):
-            sumLower = sumLower + (equilibrium[i+1]+equilibrium[i])/2.0*(beta[i+1] - beta[i])
-            sumUpper = sumUpper + (equilibrium[-i-2]+equilibrium[-i-1])/2.0*(beta[-i-2] - beta[-i-1])
-        return sumUpper - sumLower
-
-    # Calculates the infinity norm between up and down curves
-    elif option == 'infinity':
-        return max([abs(equilibrium[i]-equilibrium[-i-1]) for i in range(int((len(equilibrium)+1)/2))])
-    else:
-        print("Please select a valid option")
-
-
-def findDiffMatrix(equilibria):
-    # These depend on there being an odd number of points
-    n = np.size(equilibria, axis=0)
-    m = int(0.5*(np.size(equilibria, axis=1)+1))
-    A = np.zeros([n, m])
-    for i in range(n):
-        for j in range(m):
-            A[i, j] = abs(equilibria[i][j]-equilibria[i][-j-1])
-    return A
-
-def findDiffMatrixAndGrid(equilibria, lambdaNetwork, lambdaSimplex):
-    # These depend on there being an odd number of points
-    n = np.size(equilibria, axis=0)
-    m = int(0.5*(np.size(equilibria, axis=1)+1))
-    A = np.zeros([n, m])
-    X = np.zeros([n, m])
-    Y = np.zeros([n, m])
-    for i in range(n):
-        for j in range(m):
-            A[i, j] = abs(equilibria[i][j]-equilibria[i][-j-1])
-            X[i, j] = lambdaNetwork[j]
-            Y[i, j] = lambdaSimplex[i]
-    return X, Y, A
-
-
-def findHysteresisBoundaries(equilibria, lambdaNetwork, lambdaSimplex, tolerance):
-    # These depend on there being an odd number of points
-    n = np.size(equilibria, axis=0)
-    m = int(0.5*(np.size(equilibria, axis=1)+1))
-    leftBoundary = []
-    rightBoundary = []
-    lambdaSimplexHys = []
-    for i in range(n):
-        left = max(lambdaNetwork)
-        right = 0
-        isHysteresis = False
-        for j in range(m):
-            if abs(equilibria[i][j]-equilibria[i][-j-1]) > tolerance:
-                isHysteresis = True
-                if lambdaNetwork[j] < left:
-                    left = lambdaNetwork[j]
-                if lambdaNetwork[j] > right:
-                    right = lambdaNetwork[j]
-
-        if isHysteresis:
-            leftBoundary.append(left)
-            rightBoundary.append(right)
-            lambdaSimplexHys.append(lambdaSimplex[i])
-    return leftBoundary, rightBoundary, lambdaSimplexHys
-
-def plotTheoryAndSim(X, Y, A, leftBoundary, rightBoundary, lambdaSimplexHys):
-    plt.figure()
-    c = plt.pcolor(X, Y, A, cmap="Reds")
-    plt.plot(leftBoundary, lambdaSimplexHys, "k--")
-    plt.plot(rightBoundary, lambdaSimplexHys, "k--")
-    cbar = plt.colorbar(c)
-    cbar.set_label('Distance between fixed point solutions', rotation=90)
-    plt.xlabel(r"$\lambda$")
-    plt.ylabel(r"$\lambda_{\alpha}$")
-    plt.show()

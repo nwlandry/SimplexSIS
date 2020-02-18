@@ -17,7 +17,7 @@ def solveEquilibrium(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree
         return solveDependentEquilbrium(gamma, beta, alpha, degreeHist, digits=digits)
 
 def solveDependentEquilbrium(gamma, beta, alpha, degreeHist, digits=4):
-    initialGuesses = np.linspace(0, 1, 5)
+    initialGuesses = np.linspace(0, 0.6, 4)
     roots = list()
     minDegree = degreeHist[0][0]
     maxDegree = degreeHist[-1][0]
@@ -30,7 +30,7 @@ def solveDependentEquilbrium(gamma, beta, alpha, degreeHist, digits=4):
     return roots
 
 def solveIndependentEquilbrium(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=4):
-    initialGuesses = [[0, 0], [0.1, 0.1], [0.25, 0.25], [0.5, 0.5],[0.75, 0.75], [1, 1]]
+    initialGuesses = [[0, 0], [0.1, 0.1], [0.25, 0.25], [0.5, 0.5]]
     roots = list()
     for initialGuess in initialGuesses:
         result = root(independentEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree))
