@@ -12,9 +12,9 @@ import multiprocessing as mp
 
 # graph parameters
 r = 4 # power law exponent
-minDegree = 6.695
-maxDegree = 10
-n = 10
+minDegree = 66.95
+maxDegree = 1000
+n = 1000
 simplexSize = 3
 isIndependentUniform = True
 degreeDistType = "power-law"
@@ -32,11 +32,11 @@ dt = 0.1
 gamma = 2
 # length over which to average
 avgLength = int(0.3*timesteps)
-numBetaPts = 41
+numBetaPts = 31
 numAlphaPts = 24
 startAlpha = 0
-endAlpha = 0.075
-startBetaCritFraction = 0
+endAlpha = 0.066
+startBetaCritFraction = 0.5
 endBetaCritFraction = 1.5
 
 # generate degree sequence and adjacency matrix
@@ -98,9 +98,9 @@ beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFr
 alpha = np.linspace(startAlpha, endAlpha, numAlphaPts)
 
 start = time.time()
-averagedEquilibria = simplexContagion.generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, numProcesses)
+averagedEquilibria, equilibria = simplexContagion.generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, numProcesses)
 end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 
 with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([gamma, beta, alpha, averagedEquilibria, equilibria, betaCrit, meanDegree, meanSquaredDegree, meanCubedDegree, meanSimplexDegree], file)
+    pickle.dump([gamma, beta, alpha, averagedEquilibria, equilibria, meanDegree, meanSquaredDegree, meanCubedDegree, meanSimplexDegree], file)
