@@ -9,7 +9,7 @@ from scipy.optimize import fsolve
 powers = np.linspace(4.001,6,100)
 alphaCrit = list()
 indepAlphaCrit = list()
-n = 10000
+n = 1000
 meanDegreeTarget = 100
 initialGuess = 0.1
 gamma = 2

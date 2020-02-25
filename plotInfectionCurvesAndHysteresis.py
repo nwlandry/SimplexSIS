@@ -5,7 +5,8 @@ import simplexUtilities
 import visualizeData
 
 
-filename = 'equilibriaData_power-law_r=4_dep_final'
+filename = 'equilibriaData_power-law_r=3_indep_final'
+filename = 'equilibriaData02252020-073557'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 gamma = data[0]

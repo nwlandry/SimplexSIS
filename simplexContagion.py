@@ -136,6 +136,21 @@ def generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, bet
 
     return equilibria
 
+def generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, numProcesses):
+    argList = []
+    n = np.size(adjacencyList[0], axis=0)
+    for alphaVal in alpha:
+        for i in range(numSimulations):
+            x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
+            argList.append((adjacencyList[i], simplexSetList[i], simplexIndicesList[i], gamma, beta, alphaVal, x0, timesteps, dt, avgLength))
+
+    with mp.Pool(processes=numProcesses) as pool:
+        equilibria = pool.starmap(runOneCurve, argList)
+    averagedEquilibria = list()
+    for i in range(len(alpha)):
+        averagedEquilibria.append([sum(val)/numSimulations for val in zip(*equilibria[i*numSimulations:(i+1)*numSimulations])])
+    return averagedEquilibria, equilibria
+
 def runOneCurve(A, simplexList, simplexIndices, gamma, beta, alpha, x, timesteps, dt, avgLength, verbose=True):
     equilibria = []
     for i in range(len(beta)):

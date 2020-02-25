@@ -10,7 +10,7 @@ from simplexTheory import *
 #filename = 'Poster/uniform_indep'
 #filename = 'equilibriaData12262019-000110'
 #filename = 'Poster/power-law_r=4_indep'
-filename = 'equilibriaData_power-law_r=4_dep_final'
+filename = 'equilibriaData_power-law_r=3_indep_final'
 #filename = 'Archive-Data/equilibriaData10252019-225011'
 #filename = 'Archive-Data/equilibriaData11112019-002636'
 with open(filename, 'rb') as file:
@@ -29,12 +29,11 @@ meanSimplexDegree = data[9]
 degreeSequence = data[10]
 
 #degreeSequence = None
-minDegree = 67
+minDegree = 50
 maxDegree = 450
-isIndependent = False
+isIndependent = True
 type = "power-law"
-meanSimplexDegree = 100
-r = 4.0
+r = 3.0
 digits = 5
 
 betaTheory = np.linspace(min(beta),max(beta), 41)

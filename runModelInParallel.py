@@ -52,9 +52,9 @@ elif degreeDistType == "poisson":
 A = simplexUtilities.generateConfigModelAdjacency(degreeSequence)
 
 # Calculate values needed in critical value calculation
-meanDegree = simplexUtilities.meanPowerOfDegree(A.sum(axis=0), 1)
-meanSquaredDegree =  simplexUtilities.meanPowerOfDegree(A.sum(axis=0), 2)
-meanCubedDegree =  simplexUtilities.meanPowerOfDegree(A.sum(axis=0), 3)
+meanDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 1)
+meanSquaredDegree =  simplexUtilities.meanPowerOfDegree(degreeSequence, 2)
+meanCubedDegree =  simplexUtilities.meanPowerOfDegree(degreeSequence, 3)
 
 print("The mean degree is {:.2f}".format(meanDegree))
 print("The mean squared degree is {:.2f}".format(meanSquaredDegree))
@@ -93,4 +93,4 @@ end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 
 with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([gamma, beta, alpha, equilibria, betaCrit, alphaCrit, meanDegree, meanSquaredDegree, meanCubedDegree, meanSimplexDegree, degreeSequence], file)
+    pickle.dump([gamma, beta, alpha, equilibria, degreeSequence], file)

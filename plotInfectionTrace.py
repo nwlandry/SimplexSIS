@@ -12,14 +12,15 @@ import multiprocessing as mp
 
 # graph parameters
 r = 4 # power law exponent
-minDegree = 13.35
-maxDegree = 10000
-n = 10000
+minDegree = 66.68
+maxDegree = 1000
+n = 1000
 simplexSize = 3
 isIndependentUniform = True
 degreeDistType = "power-law"
 meanSimplexDegree = 100
 meanDegree = 100
+
 
 # Epidemic parameters
 initialFraction = 0.01
@@ -28,7 +29,7 @@ x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
 #simulation parameters
 timesteps = 1000
 dt = 0.1
-alphaCritFraction = 1
+alpha = 0.04
 betaCritFraction = 1.1
 gamma = 2
 
@@ -40,6 +41,9 @@ elif degreeDistType == "power-law":
 elif degreeDistType == "poisson":
     k = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
 
+plt.figure()
+plt.hist(k, bins=50)
+plt.show()
 A = simplexUtilities.generateConfigModelAdjacency(k)
 
 # Calculate values needed in critical value calculation
@@ -73,7 +77,6 @@ print("beta critical is " + str(betaCrit))
 print("alpha critical is " + str(alphaCrit))
 
 beta = betaCritFraction*betaCrit
-alpha = alphaCritFraction*alphaCrit
 
 start = time.time()
 averageInfection, endState = simplexContagion.microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt)
