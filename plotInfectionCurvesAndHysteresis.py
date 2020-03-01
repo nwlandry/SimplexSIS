@@ -7,12 +7,14 @@ import visualizeData
 
 filename = 'equilibriaData_power-law_r=3_indep_final'
 filename = 'equilibriaData02252020-130441'
+filename = 'equilibriaData02292020-015156'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 gamma = data[0]
 beta = data[1]
 alpha = data[2]
 equilibria = data[3]
+
 
 plt.figure()
 for i in range(len(equilibria)):
@@ -29,7 +31,6 @@ for i in range(len(alpha)):
 
 plt.figure()
 plt.plot(alpha, hysteresis, 'o-', label="Hysteresis")
-
 plt.xlabel(r"$\alpha$")
 plt.ylabel("Hysteresis")
 plt.legend(loc="lower right")

@@ -64,18 +64,12 @@ for i in range(numSimulations):
     meanNumSelfLoops = meanNumSelfLoops + np.trace(adjacencyList[i].todense())/numSimulations
 
 betaCrit = meanDegree/meanSquaredDegree*gamma
-if isIndependentUniform:
-    alphaCrit = meanCubedDegree/(meanDegree**3 * meanSimplexDegree)*gamma
-else:
-    alphaCrit = (meanDegree**2)*meanCubedDegree/(meanSquaredDegree**3)*gamma
 
 print("The mean degree is {:.2f}".format(meanDegree))
 print("The mean squared degree is {:.2f}".format(meanSquaredDegree))
 print("The mean cubed degree is {:.2f}".format(meanCubedDegree))
 print("The mean simplex degree is {}".format(meanSimplexDegree))
 print("{} self-loops".format(meanNumSelfLoops))
-print("beta critical is " + str(betaCrit))
-print("alpha critical is " + str(alphaCrit))
 
 #Generate simplex list
 simplexSetList = list()
@@ -103,4 +97,4 @@ end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 
 with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([gamma, beta, alpha, averagedEquilibria, equilibria, meanDegree, meanSquaredDegree, meanCubedDegree, meanSimplexDegree], file)
+    pickle.dump([gamma, beta, alpha, averagedEquilibria, equilibria, isIndependent, degreeDistType, r, meanDegree, meanSquaredDegree, meanCubedDegree, meanSimplexDegree, minDegree, maxDegree], file)

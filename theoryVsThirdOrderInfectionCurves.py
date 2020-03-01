@@ -7,27 +7,12 @@ import numpy as np
 from simplexTheory import *
 import csv
 
-#filename = 'Poster/uniform_indep'
-#filename = 'equilibriaData12262019-000110'
-#filename = 'Poster/power-law_r=4_indep'
-#filename = 'equilibriaData_power-law_r=4_final'
-#filename = 'Archive-Data/equilibriaData10252019-225011'
-#filename = 'Archive-Data/equilibriaData11112019-002636'
-mathematicaFile = 'indepData.csv'
-# with open(filename, 'rb') as file:
-#     data = pickle.load(file)
-#
-# gamma = data[0]
-# beta = data[1]
-# alpha = data[2]
-# equilibria = data[3]
-
-
+mathematicaFile = 'depData.csv'
 
 gamma = 2
 minDegree = 67
 maxDegree = 450
-isIndependent = True
+isIndependent = False
 type = "power-law"
 meanSimplexDegree = 100
 r = 4.0
@@ -54,12 +39,12 @@ with open(mathematicaFile, newline='') as csvfile:
 plt.figure()
 plt.plot(betaExpansion,meanInfectionExpansion)
 
-betaTheory = np.linspace(min(betaExpansion), max(betaExpansion)+0.01, 45)
+betaTheory = np.linspace(min(betaExpansion)-0.001, max(betaExpansion)+0.01, 150)
 
 for betaVal in betaTheory:
     roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=isIndependent, type=type, r=r, digits=digits)
     for root in roots:
-        plt.scatter(betaVal, root, s=10, color='black')
+        plt.scatter(betaVal, root, s=5, color='black')
 
 plt.xlabel(r'$\beta$')
 plt.ylabel('infected average')

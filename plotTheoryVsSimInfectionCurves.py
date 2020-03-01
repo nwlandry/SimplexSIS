@@ -10,9 +10,10 @@ from simplexTheory import *
 #filename = 'Poster/uniform_indep'
 #filename = 'equilibriaData12262019-000110'
 #filename = 'Poster/power-law_r=4_indep'
-filename = 'equilibriaData_power-law_r=4_final'
+filename = 'equilibriaData02292020-015156'
 #filename = 'Archive-Data/equilibriaData10252019-225011'
 #filename = 'Archive-Data/equilibriaData11112019-002636'
+
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 
@@ -20,31 +21,26 @@ gamma = data[0]
 beta = data[1]
 alpha = data[2]
 equilibria = data[3]
-betaCrit = data[4]
-alphaCrit = data[5]
-meanDegree = data[6]
-meanSquaredDegree = data[7]
-meanCubedDegree = data[8]
-meanSimplexDegree = data[9]
-degreeSequence = data[10]
-# alpha = data[0]
-# beta = data[1]
-# gamma = data[2]
-# equilibria = data[5]
-
-minDegree = 67
-maxDegree = 150
-isIndependent = True
-type = "power-law"
-meanSimplexDegree = 100
-r = 4.001
+degreeSequence = data[4] # This is the full list of equilibria if it's an ensemble run
+isIndependent = data[5]
+type = data[6]
+r = data[7]
+if len(degreeSequence[0]) != 1: # set degree sequence to none if "degree"
+    degreeSequence = None
+    meanDegree = data[8]
+    meanSquaredDegree = data[9]
+    meanCubedDegree = data[10]
+    meanSimplexDegree = data[11]
+    minDegree = data[12]
+    maxDegree = data[13]
+else:
+    meanSimplexDegree = data[8]
+    minDegree = min(degreeSequence)
+    maxDegree = max(degreeSequence)
+    
 digits = 5
 
 index = 0
-print(alpha)
-
-#alphaCrit = meanPowerOfPowerLaw(minDegree, maxDegree, r, 3)/(meanPowerOfPowerLaw(minDegree, maxDegree, r, 1)**4)*gamma
-#print(alphaCrit)
-#visualizeData.plotTheoreticalInfectionCurves(gamma, beta, alpha[index], minDegree, maxDegree, meanSimplexDegree, digits=digits, isIndependent=isIndependent, type=type, r=r)
+print(alpha[index])
 
 visualizeData.plotTheoreticalAndSimInfectionCurves(equilibria[index], gamma, beta, alpha[index], minDegree, maxDegree, meanSimplexDegree, degreeSequence=degreeSequence, isIndependent=isIndependent, type=type, r=r, digits=digits)

@@ -32,6 +32,7 @@ dt = 0.1
 avgLength = int(0.3*timesteps)
 numBetaPts = 41
 numAlphaPts = 24
+gamma = 2
 #startAlphaCritFraction = 0
 #endAlphaCritFraction = 1.5
 startAlpha = 0
@@ -59,32 +60,23 @@ meanCubedDegree =  simplexUtilities.meanPowerOfDegree(degreeSequence, 3)
 print("The mean degree is {:.2f}".format(meanDegree))
 print("The mean squared degree is {:.2f}".format(meanSquaredDegree))
 print("The mean cubed degree is {:.2f}".format(meanCubedDegree))
-print("The mean simplex degree is {}".format(meanSimplexDegree))
-
 print("{} self-loops".format(np.trace(A.todense())))
 
 
 #Generate simplex list
 if isIndependentUniform:
     [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
-    # epidemic parameters
-    gamma = 2
-    betaCrit = meanDegree/meanSquaredDegree*gamma
-    alphaCrit = meanCubedDegree/(meanDegree**3 * meanSimplexDegree)*gamma
-
 else:
     [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(degreeSequence, simplexSize)
-    # epidemic parameters
-    gamma = 2
-    betaCrit = meanDegree/meanSquaredDegree*gamma
-    alphaCrit = (meanDegree**2)*meanCubedDegree/(meanSquaredDegree**3)*gamma
+
+betaCrit = meanDegree/meanSquaredDegree*gamma
+meanSimplexDegree = len(simplexList)/n
+print("The mean simplex degree is {}".format(meanSimplexDegree))
 
 print("beta critical is " + str(betaCrit))
-print("alpha critical is " + str(alphaCrit))
 
 beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFraction*betaCrit, numBetaPts),
                       np.linspace(betaCrit*(endBetaCritFraction-(endBetaCritFraction-startBetaCritFraction)/(numBetaPts-1)), startBetaCritFraction*betaCrit, numBetaPts-1)])
-#alpha = np.linspace(startAlphaCritFraction*alphaCrit, endAlphaCritFraction*alphaCrit, numAlphaPts)
 alpha = np.linspace(startAlpha, endAlpha, numAlphaPts)
 
 start = time.time()
@@ -93,4 +85,4 @@ end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 
 with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([gamma, beta, alpha, equilibria, degreeSequence], file)
+    pickle.dump([gamma, beta, alpha, equilibria, degreeSequence, isIndependent, degreeDistType, r, meanSimplexDegree], file)
