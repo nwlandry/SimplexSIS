@@ -16,21 +16,23 @@ minDegree = 66.68
 maxDegree = 1000
 n = 1000
 simplexSize = 3
-isIndependentUniform = True
+isIndependentUniform = False
 degreeDistType = "power-law"
 meanSimplexDegree = 100
 meanDegree = 100
 
 
 # Epidemic parameters
-initialFraction = 0.01
-x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
-
+initialFraction = 0.1
+x01 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
+initialFraction = 0.4
+x02 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
+initialConditions = [x01, x02]
 #simulation parameters
 timesteps = 1000
 dt = 0.1
-alpha = 0.04
-betaCritFraction = 1.1
+alpha = 0.06
+betaCritFraction = 0.7
 gamma = 2
 
 # generate degree sequence and adjacency matrix
@@ -41,9 +43,6 @@ elif degreeDistType == "power-law":
 elif degreeDistType == "poisson":
     k = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
 
-plt.figure()
-plt.hist(k, bins=50)
-plt.show()
 A = simplexUtilities.generateConfigModelAdjacency(k)
 
 # Calculate values needed in critical value calculation
@@ -61,30 +60,22 @@ print("{} self-loops".format(np.trace(A.todense())))
 
 #Generate simplex list
 if isIndependentUniform:
-    #[simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, int(meanDegree*n), simplexSize)
     [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
-    # epidemic parameters
-    betaCrit = meanDegree/meanSquaredDegree*gamma
-    alphaCrit = meanCubedDegree/(meanDegree**3 * meanSimplexDegree)*gamma
-
 else:
     [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(k, simplexSize)
     # epidemic parameters
-    betaCrit = meanDegree/meanSquaredDegree*gamma
-    alphaCrit = (meanDegree**2)*meanCubedDegree/(meanSquaredDegree**3)*gamma
 
-print("beta critical is " + str(betaCrit))
-print("alpha critical is " + str(alphaCrit))
-
+betaCrit = meanDegree/meanSquaredDegree*gamma
 beta = betaCritFraction*betaCrit
 
+plt.figure()
 start = time.time()
-averageInfection, endState = simplexContagion.microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt)
+for x0 in initialConditions:
+    averageInfection, endState = simplexContagion.microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt)
+    plt.plot(np.linspace(0, (timesteps-1)*dt, timesteps), averageInfection)
+
 end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
-
-plt.figure()
-plt.plot(np.linspace(0, (timesteps-1)*dt, timesteps), averageInfection)
-plt.xlabel("time")
-plt.ylabel(r"$\langle I\rangle$")
+plt.xlabel("time", fontsize=18)
+plt.ylabel(r"$\langle I\rangle$", fontsize=18)
 plt.show()

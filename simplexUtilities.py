@@ -7,24 +7,35 @@ import multiprocessing as mp
 def meanPowerOfDegree(k, power):
     return np.asscalar(np.power(k, power).mean())
 
-def invCDF(u, k0, n, exponent):
-    return (k0**(1-exponent) + u*(n**(1-exponent) - k0**(1-exponent)))**(1/(1-exponent))
 
-def generatePowerLawDegreeSequence(numPoints, k0, n, gamma):
-    k = []
+def invCDFPowerLaw(u, minDegree, maxDegree, exponent):
+    return (minDegree**(1-exponent) + u*(maxDegree**(1-exponent) - minDegree**(1-exponent)))**(1/(1-exponent))
 
-    for i in range(numPoints):
-        u = random.uniform(0, 1)
-        k.append(round(invCDF(u, k0, n, gamma)))
-    return sorted(k)
 
-def generateUniformDegreeSequence(numPoints, min, max):
-    k = []
+def generatePowerLawDegreeSequence(numPoints, minDegree, maxDegree, gamma, isRandom=True):
+    degreeSequence = list()
+    if isRandom:
+        for i in range(numPoints):
+            u = random.uniform(0, 1)
+            degreeSequence.append(round(invCDFPowerLaw(u, minDegree, maxDegree, gamma)))
+        return sorted(degreeSequence)
+    else:
+        for i in range(numPoints):
+            degreeSequence.append(round(invCDFPowerLaw(i/(numPoints-1), minDegree, maxDegree, gamma)))
+        return degreeSequence
 
-    for i in range(numPoints):
-        u = random.randrange(min, max)
-        k.append(round(u))
-    return k
+
+def generateUniformDegreeSequence(numPoints, minDegree , maxDegree, isRandom=True):
+    degreeSequence = list()
+    if isRandom:
+        for i in range(numPoints):
+            u = random.randrange(round(minDegree), round(maxDegree))
+            degreeSequence.append(round(u))
+        return sorted(degreeSequence)
+    else:
+        for i in range(numPoints):
+            degreeSequence.append(round(minDegree + i/(numPoints-1)*(maxDegree-minDegree)))
+        return degreeSequence
 
 def generatePoissonDegreeSequence(numPoints, meanDegree):
     return np.random.poisson(lam=meanDegree, size=numPoints).tolist()
