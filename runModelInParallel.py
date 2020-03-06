@@ -16,10 +16,11 @@ minDegree = 66.68
 maxDegree = 10000
 n = 10000
 simplexSize = 3
-isIndependentUniform = True
+isIndependent = True
 degreeDistType = "power-law"
 meanSimplexDegree = 100
 meanDegree = 100
+isRandom = False
 
 # Epidemic parameters
 initialFraction = 0.01
@@ -30,23 +31,22 @@ timesteps = 1000
 dt = 0.1
 # length over which to average
 avgLength = int(0.3*timesteps)
-numBetaPts = 41
+numBetaPts = 31
 numAlphaPts = 24
 gamma = 2
-#startAlphaCritFraction = 0
-#endAlphaCritFraction = 1.5
-startAlpha = 0
-endAlpha = 0.075
-startBetaCritFraction = 0
+alphaCrit = 0.066
+startAlphaCritFraction = 0.5
+endAlphaCritFraction = 1.5
+startBetaCritFraction = 0.5
 endBetaCritFraction = 1.5
 numProcesses = numAlphaPts
 
 
 # generate degree sequence and adjacency matrix
 if degreeDistType == "uniform":
-    degreeSequence = simplexUtilities.generateUniformDegreeSequence(n, minDegree, maxDegree)
+    degreeSequence = simplexUtilities.generateUniformDegreeSequence(n, minDegree, maxDegree, isRandom=isRandom)
 elif degreeDistType == "power-law":
-    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, r)
+    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, r, isRandom=isRandom)
 elif degreeDistType == "poisson":
     degreeSequence = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
 
@@ -64,7 +64,7 @@ print("{} self-loops".format(np.trace(A.todense())))
 
 
 #Generate simplex list
-if isIndependentUniform:
+if isIndependent:
     [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
 else:
     [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(degreeSequence, simplexSize)
@@ -77,7 +77,7 @@ print("beta critical is " + str(betaCrit))
 
 beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFraction*betaCrit, numBetaPts),
                       np.linspace(betaCrit*(endBetaCritFraction-(endBetaCritFraction-startBetaCritFraction)/(numBetaPts-1)), startBetaCritFraction*betaCrit, numBetaPts-1)])
-alpha = np.linspace(startAlpha, endAlpha, numAlphaPts)
+alpha = np.linspace(startAlphaCritFraction*alphaCrit, endAlphaCritFraction*alphaCrit, numAlphaPts)
 
 start = time.time()
 equilibria = simplexContagion.generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numProcesses)
