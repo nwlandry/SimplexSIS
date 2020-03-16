@@ -5,7 +5,8 @@ import simplexUtilities
 import visualizeData
 
 
-filename = 'equilibriaData_power-law_r=3_indep_final'
+filename = 'equilibriaData_power-law_r=3_dep_nonrandom_degree'
+filename = 'Non-Random Degree/equilibriaData_power-law_r=4_dep_nonrandom_degree'
 #filename = 'equilibriaData02222020-191255#'
 #filename = 'equilibriaData03042020-165346'
 #filename = 'Poster/uniform_dep'
@@ -35,6 +36,6 @@ plt.figure()
 plt.plot(alpha, hysteresis, 'o-', label="Hysteresis")
 plt.xlabel(r"$\alpha$", fontsize=24)
 plt.ylabel("Hysteresis", fontsize=24)
-#plt.legend(loc="upper left", fontsize=14)
+plt.legend(loc="upper left", fontsize=14)
 plt.tight_layout()
 plt.show()

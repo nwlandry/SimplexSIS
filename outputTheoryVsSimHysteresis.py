@@ -5,11 +5,12 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 from simplexTheory import *
+from datetime import *
 
-filename = 'equilibriaData_power-law_r=4_dep_final'
-outputFilename = 'hysteresis_r=4_dep_final'
-simulationLabel = "Power law, r=4, Dependent (Simulation)"
-theoreticalLabel = "Power law, r=4, Dependent (Theory)"
+filename = 'Non-Random Degree/equilibriaData_uniform_dep_nonrandom_degree'
+outputFilename = 'hysteresis_uniform_dep_nonrandom_degree'
+simulationLabel = "Uniform, Dependent (Simulation)"
+theoreticalLabel = "Uniform, Dependent (Theory)"
 #filename = 'Archive-Data/equilibriaData11112019-002636'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
@@ -18,14 +19,10 @@ gamma = data[0]
 beta = data[1]
 alpha = data[2]
 equilibria = data[3]
-#degreeSequence = data[4] # This is the full list of equilibria if it's an ensemble run
-degreeSequence = data[10]
-#isIndependent = data[5]
-#type = data[6]
-#r = data[7]
-isIndependent = False
-r = 4
-type = "power-law"
+degreeSequence = data[4] # This is the full list of equilibria if it's an ensemble run
+isIndependent = data[5]
+type = data[6]
+r = data[7]
 if isinstance(degreeSequence[0], list) : # set degree sequence to none if "degree"
     degreeSequence = None
     meanDegree = data[8]
@@ -35,13 +32,12 @@ if isinstance(degreeSequence[0], list) : # set degree sequence to none if "degre
     minDegree = data[12]
     maxDegree = data[13]
 else:
-    meanSimplexDegree = data[9]
-    #meanSimplexDegree = data[8]
+    meanSimplexDegree = data[8]
+    print(meanSimplexDegree)
     minDegree = min(degreeSequence)
     maxDegree = max(degreeSequence)
 
 digits = 5
-
 betaTheory = np.linspace(min(beta),max(beta), 61)
 
 hysteresisTheory = list()

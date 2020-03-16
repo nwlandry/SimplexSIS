@@ -30,6 +30,7 @@ numSimulations = 10
 timesteps = 1000
 dt = 0.1
 gamma = 2
+nodeFractionToRestart = 0.005
 # length over which to average
 avgLength = int(0.3*timesteps)
 numBetaPts = 31
@@ -92,7 +93,7 @@ beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFr
 alpha = np.linspace(startAlpha, endAlpha, numAlphaPts)
 
 start = time.time()
-averagedEquilibria, equilibria = simplexContagion.generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, numProcesses)
+averagedEquilibria, equilibria = simplexContagion.generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, numProcesses, nodeFractionToRestart)
 end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 

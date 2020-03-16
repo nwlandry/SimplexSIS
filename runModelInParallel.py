@@ -29,6 +29,7 @@ x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
 #simulation parameters
 timesteps = 1000
 dt = 0.1
+nodeFractionToRestart = 0.002
 # length over which to average
 avgLength = int(0.3*timesteps)
 numBetaPts = 31
@@ -70,7 +71,7 @@ else:
     [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(degreeSequence, simplexSize)
 
 betaCrit = meanDegree/meanSquaredDegree*gamma
-meanSimplexDegree = len(simplexList)/n
+meanSimplexDegree = simplexSize*len(simplexList)/n
 print("The mean simplex degree is {}".format(meanSimplexDegree))
 
 print("beta critical is " + str(betaCrit))
@@ -80,7 +81,7 @@ beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFr
 alpha = np.linspace(startAlphaCritFraction*alphaCrit, endAlphaCritFraction*alphaCrit, numAlphaPts)
 
 start = time.time()
-equilibria = simplexContagion.generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numProcesses)
+equilibria = simplexContagion.generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numProcesses, nodeFractionToRestart)
 end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 

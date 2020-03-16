@@ -7,12 +7,12 @@ import numpy as np
 from simplexTheory import *
 import csv
 
-mathematicaFile = 'depData.csv'
+mathematicaFile = 'indepData.csv'
 
 gamma = 2
 minDegree = 67
 maxDegree = 450
-isIndependent = False
+isIndependent = True
 type = "power-law"
 meanSimplexDegree = 100
 r = 4.0
@@ -22,7 +22,7 @@ degreeHist = generateTheoreticalDegreeHist(minDegree, maxDegree, type, r=r)
 
 index = 0
 
-alpha = 0.033
+alpha = 0.023
 betaExpansion = list()
 meanInfectionExpansion = list()
 with open(mathematicaFile, newline='') as csvfile:
@@ -39,7 +39,7 @@ with open(mathematicaFile, newline='') as csvfile:
 plt.figure()
 plt.plot(betaExpansion,meanInfectionExpansion)
 
-betaTheory = np.linspace(min(betaExpansion)-0.001, max(betaExpansion)+0.01, 150)
+betaTheory = np.linspace(min(betaExpansion)-0.001, max(betaExpansion)+0.001, 150)
 
 for betaVal in betaTheory:
     roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=isIndependent, type=type, r=r, digits=digits)
@@ -48,4 +48,5 @@ for betaVal in betaTheory:
 
 plt.xlabel(r'$\beta$')
 plt.ylabel('infected average')
+plt.ylim([0,1])
 plt.show()
