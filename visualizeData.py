@@ -2,10 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import simplexTheory
 
-def plotTheoreticalInfectionCurves(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=False, type="power-law", r=4, digits=4):
+def plotTheoreticalInfectionCurves(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, digits=4):
+    if meanSimplexDegree == None:
+        meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
     plt.figure()
-    for betaVal in beta[0:int((len(beta)+1)/2)]:
-        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=degreeSequence, isIndependent=isIndependent, type=type, r=r, digits=digits)
+    for betaVal in beta:
+        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
         for root in roots:
             plt.scatter(betaVal, root, color='black')
 
@@ -14,11 +16,11 @@ def plotTheoreticalInfectionCurves(gamma, beta, alpha, minDegree, maxDegree, mea
     plt.ylabel('infected average')
     plt.show()
 
-def plotTheoreticalAndSimInfectionCurves(equilibrium, gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=False, type="power-law", r=4, numTheoryPoints=50, digits=4):
+def plotTheoreticalAndSimInfectionCurves(equilibrium, gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, numTheoryPoints=50, digits=4):
     plt.figure()
     betaTheory = np.linspace(min(beta), max(beta), numTheoryPoints)
     for betaVal in betaTheory:
-        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=degreeSequence, isIndependent=isIndependent, type=type, r=r, digits=digits)
+        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeHist=degreeHist, isIndependent=isIndependent, type=type, r=r, digits=digits)
         print(roots)
         for root in roots:
             plt.scatter(betaVal, root, color='black')
@@ -44,20 +46,6 @@ def calculateHysteresis(equilibrium, beta, option='area'):
         return max([abs(equilibrium[i]-equilibrium[-i-1]) for i in range(int((len(equilibrium)+1)/2))])
     else:
         print("Please select a valid option")
-
-def calculateTheoreticalHysteresis(gamma, betaTheory, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=False, type="power-law", r=4, option="infinity", digits=4):
-    hysteresis = 0
-    for betaVal in betaTheory:
-        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=degreeSequence, isIndependent=isIndependent, type=type, r=r, digits=digits)
-        if isIndependent and len(roots) == 3:
-            if option == "infinity":
-                if max(roots)-min(roots) > hysteresis:
-                    hysteresis = max(roots)-min(roots)
-        elif not isIndependent and len(roots) == 2:
-            if option == "infinity":
-                if max(roots)-min(roots) > hysteresis:
-                    hysteresis = max(roots)-min(roots)
-    return hysteresis
 
 # def findDiffMatrix(equilibria):
 #     # These depend on there being an odd number of points

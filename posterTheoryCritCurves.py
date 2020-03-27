@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import fsolve
 
-powers = np.linspace(4.001,6,100)
-alphaCrit = list()
+powers = np.linspace(3.001,6,100)
+depAlphaCrit = list()
 indepAlphaCrit = list()
 n = 1000
 meanDegreeTarget = 100
@@ -22,8 +22,8 @@ for power in powers:
     meanDegree = simplexTheory.meanPowerOfPowerLaw(minDeg, n, power, 1)
     meanSquaredDegree = simplexTheory.meanPowerOfPowerLaw(minDeg, n, power, 2)
     meanCubedDegree = simplexTheory.meanPowerOfPowerLaw(minDeg, n, power, 3)
-    indepAlphaCrit.append(meanCubedDegree/(meanDegree**4)*gamma)
-    alphaCrit.append((meanDegree**2)*meanCubedDegree/(meanSquaredDegree**3)*gamma)
+    indepAlphaCrit.append(meanSquaredDegree/(meanDegree**3)*gamma)
+    depAlphaCrit.append((meanDegree**2)*meanCubedDegree/(meanSquaredDegree**3)*gamma)
 
 
 minUniform = 10
@@ -33,11 +33,11 @@ meanDegreeUniform = 0.5*(minUniform + maxUniform)
 meanSquaredDegreeUniform = 1.0/(3*maxUniform-3*minUniform)*(maxUniform**3 - minUniform**3)
 meanCubedDegreeUniform = 1.0/(4*maxUniform-4*minUniform)*(maxUniform**4 - minUniform**4)
 
-critUniformIndep = meanCubedDegreeUniform/(meanDegreeUniform**4)*gamma
+critUniformIndep = meanSquaredDegreeUniform/(meanDegreeUniform**3)*gamma
 critUniform = (meanDegreeUniform**2)*meanCubedDegreeUniform/(meanSquaredDegreeUniform**3)*gamma
 
 plt.figure()
-plt.plot(powers, alphaCrit, linewidth=2, label=r"Critical $\alpha$ for dependent simplices (power law)")
+plt.plot(powers, depAlphaCrit, linewidth=2, label=r"Critical $\alpha$ for dependent simplices (power law)")
 plt.plot(powers, indepAlphaCrit, linewidth=2, label=r"Critical $\alpha$ for independent simplices (power law)")
 plt.plot([min(powers), max(powers)], [critUniform, critUniform], linewidth=2, label=r"Critical $\alpha$ for dependent simplices (uniform)")
 plt.plot([min(powers), max(powers)], [critUniformIndep, critUniformIndep], linewidth=2, label=r"Critical $\alpha$ for independent simplices (uniform)")

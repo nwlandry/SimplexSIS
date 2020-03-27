@@ -130,7 +130,7 @@ def generateSISEquilibria(A, simplexList, simplexIndices, gamma, beta, alpha, x0
 def generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, nodeFractionToRestart, numProcesses, verbose=True):
     argList = []
     for alphaVal in alpha:
-        argList.append((A, simplexList, simplexIndices, gamma, beta, alphaVal, x0, timesteps, dt, avgLength, nodeFractionToRestart, verbose=verbose))
+        argList.append((A, simplexList, simplexIndices, gamma, beta, alphaVal, x0, timesteps, dt, avgLength, nodeFractionToRestart, verbose))
     with mp.Pool(processes=numProcesses) as pool:
         equilibria = pool.starmap(runOneCurve, argList)
 
@@ -142,7 +142,7 @@ def generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, sim
     for alphaVal in alpha:
         for i in range(numSimulations):
             x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
-            argList.append((adjacencyList[i], simplexSetList[i], simplexIndicesList[i], gamma, beta, alphaVal, x0, timesteps, dt, avgLength, nodeFractionToRestart, verbose=verbose))
+            argList.append((adjacencyList[i], simplexSetList[i], simplexIndicesList[i], gamma, beta, alphaVal, x0, timesteps, dt, avgLength, nodeFractionToRestart, verbose))
 
     with mp.Pool(processes=numProcesses) as pool:
         equilibria = pool.starmap(runOneCurve, argList)

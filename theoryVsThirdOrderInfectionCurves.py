@@ -39,14 +39,21 @@ with open(mathematicaFile, newline='') as csvfile:
 plt.figure()
 plt.plot(betaExpansion,meanInfectionExpansion)
 
-betaTheory = np.linspace(min(betaExpansion)-0.001, max(betaExpansion)+0.001, 150)
+betaTheory = np.linspace(min(betaExpansion), max(betaExpansion), 200)
 
 for betaVal in betaTheory:
     roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=isIndependent, type=type, r=r, digits=digits)
     for root in roots:
         plt.scatter(betaVal, root, s=5, color='black')
 
+meanDegree = sum([k*prob for k, prob in degreeHist])
+meanSquaredDegree = sum([k**2*prob for k, prob in degreeHist])
+print(meanDegree)
+print(meanSquaredDegree)
+
+plt.scatter(98.5976/11499.9*2, 0, s=50, color='red')
+plt.scatter(meanDegree/meanSquaredDegree*2, 0, s=50, color='green')
 plt.xlabel(r'$\beta$')
 plt.ylabel('infected average')
-plt.ylim([0,1])
+plt.ylim([0, 0.06])
 plt.show()

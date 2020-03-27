@@ -2,14 +2,10 @@ from scipy.optimize import fsolve, root
 import matplotlib.pyplot as plt
 import numpy as np
 
-def solveEquilibrium(gamma, beta, alpha, minDegree, maxDegree, meanSimplexDegree=None, degreeSequence=None, isIndependent=False, type="power-law", r=4, digits=4):
-    if degreeSequence is None:
-        degreeHist = generateTheoreticalDegreeHist(minDegree, maxDegree, type, r=r)
-    else:
-        degreeHist = degreeSequenceToHist(degreeSequence)
+def solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, digits=4):
 
     if meanSimplexDegree is None:
-        meanDegree = generateMeanDegreeFromHist(degreeHist)
+        meanSimplexDegree = generateMeanDegreeFromHist(degreeHist)
 
     if isIndependent:
         return solveIndependentEquilbrium(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=digits)
@@ -89,6 +85,10 @@ def generateTheoreticalDegreeHist(minDegree, maxDegree, networkDist, r=4):
         else:
             print("Not a valid option")
         degreeHist.append([degree, prob])
+    totalProb = sum([prob for k, prob in degreeHist])
+    if totalProb != 1:
+        for item in degreeHist:
+            item[1] = item[1]/totalProb
     return degreeHist
 
 def computeMeanDegreeFromHist(hist):
@@ -130,6 +130,47 @@ def avgOfPowerLawEqn(minDegree, maxDegree, r, meanDeg):
 
 def meanPowerOfPowerLaw(minDegree, maxDegree, r, power):
     return (minDegree**(power+1-r)-maxDegree**(power+1-r))*(r-1)/((minDegree**(1-r)-maxDegree**(1-r))*(r-power-1))
+
+def calculateTheoreticalHysteresis(gamma, betaTheory, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, option="infinity", digits=4):
+    if meanSimplexDegree == None:
+        meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
+    hysteresis = 0
+    for betaVal in betaTheory:
+        roots = solveEquilibrium(gamma, betaVal, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
+        if isIndependent and len(roots) == 3:
+            if option == "infinity":
+                if max(roots)-min(roots) > hysteresis:
+                    hysteresis = max(roots)-min(roots)
+        elif not isIndependent and len(roots) == 2:
+            if option == "infinity":
+                if max(roots)-min(roots) > hysteresis:
+                    hysteresis = max(roots)-min(roots)
+    return hysteresis
+
+def calculateTheoreticalCriticalAlpha(gamma, beta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=None, isIndependent=False, option="infinity", digits=4, tolerance=0.0001):
+    if meanSimplexDegree == None:
+        meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
+
+    minAlphaCrit = minAlpha
+    maxAlphaCrit = maxAlpha
+
+    minAlphaHysteresis = calculateTheoreticalHysteresis(gamma, beta, minAlphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits)
+    maxAlphaHysteresis = calculateTheoreticalHysteresis(gamma, beta, maxAlphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits)
+
+    if minAlphaHysteresis < 0.0001 and maxAlphaHysteresis > 0.0001:
+        # Bisection method
+        while maxAlphaCrit - minAlphaCrit > tolerance:
+            newAlpha = 0.5*(minAlphaCrit + maxAlphaCrit)
+            newHysteresis = calculateTheoreticalHysteresis(gamma, beta, newAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits)
+            if newHysteresis < 0.0001:
+                minAlphaCrit = newAlpha
+            else:
+                maxAlphaCrit = newAlpha
+            print("min " + str(minAlphaCrit))
+            print("max " + str(maxAlphaCrit))
+        return 0.5*(minAlphaCrit + maxAlphaCrit)
+    else:
+        return float("nan")
 
 def findHysteresisBoundaries(gamma, betaList, alphaList, minDegree, maxDegree, meanSimplexDegree, tolerance, isIndependent=False, type="uniform", r=4):
     # These depend on there being an odd number of points

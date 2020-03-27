@@ -4,8 +4,8 @@ from scipy.sparse import csr_matrix
 import numpy as np
 import multiprocessing as mp
 
-def meanPowerOfDegree(k, power):
-    return np.asscalar(np.power(k, power).mean())
+def meanPowerOfDegree(degreeSequence, power):
+    return np.asscalar(np.power(degreeSequence, power).mean())
 
 
 def invCDFPowerLaw(u, minDegree, maxDegree, exponent):
@@ -41,9 +41,9 @@ def generatePoissonDegreeSequence(numPoints, meanDegree):
     return np.random.poisson(lam=meanDegree, size=numPoints).tolist()
 
 
-def generateChungLuAdjacency(kIn, kOut, n):
-    meanDegree = sum(kIn)/len(kIn)
-    if len(kIn)!=n or len(kOut)!=n:
+def generateChungLuAdjacency(inDegree, outDegree, n):
+    meanDegree = sum(inDegree)/len(inDegree)
+    if len(inDegree)!=n or len(outDegree)!=n:
         return
 
     rowIndex = []
@@ -52,7 +52,7 @@ def generateChungLuAdjacency(kIn, kOut, n):
     for i in range(n):
         for j in range(n):
             u = random.uniform(0, 1)
-            if u < min(kIn[i]*kOut[j]/(n*meanDegree), 1):
+            if u < min(inDegree[i]*outDegree[j]/(n*meanDegree), 1):
                 rowIndex.append(i)
                 columnIndex.append(j)
                 weights.append(1)

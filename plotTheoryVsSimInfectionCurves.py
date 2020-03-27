@@ -37,10 +37,12 @@ else:
     meanSimplexDegree = data[8]
     minDegree = min(degreeSequence)
     maxDegree = max(degreeSequence)
-    
+
 digits = 5
+
+degreeHist = simplexTheory.degreeSequenceToHist(degreeSequence)
 
 index = 0
 print(alpha[index])
 
-visualizeData.plotTheoreticalAndSimInfectionCurves(equilibria[index], gamma, beta, alpha[index], minDegree, maxDegree, meanSimplexDegree, degreeSequence=degreeSequence, isIndependent=isIndependent, type=type, r=r, digits=digits)
+visualizeData.plotTheoreticalAndSimInfectionCurves(equilibria[index], gamma, beta, alpha[index], degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)

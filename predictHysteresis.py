@@ -1,36 +1,31 @@
-import simplexTheory
+import simplexUtilities
 import visualizeData
 import simplexContagion
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
+from datetime import *
 from simplexTheory import *
 
 gamma = 2
-minBeta = 0
-maxBeta = 0.05
-numBetaPoints = 30
-minAlpha = 0.04
-maxAlpha = 0.05
-numAlphaPoints = 20
-beta = np.linspace(minBeta, maxBeta, numBetaPoints)
-alpha = np.linspace(minAlpha, maxAlpha, numAlphaPoints)
-
 minDegree = 50
 maxDegree = 450
 isIndependent = True
 type = "power-law"
-meanSimplexDegree = 100
+
 r = 3.0
-digits = 4
+digits = 5
+tolerance = 0.0001
+minAlpha = 0
+maxAlpha = 0.6
 
-hysteresisTheory = list()
-for i in range(len(alpha)):
-    hysteresisTheory.append(visualizeData.calculateTheoreticalHysteresis(gamma, beta, alpha[i], minDegree, maxDegree, meanSimplexDegree, degreeSequence=None, isIndependent=isIndependent, type=type, r=r, option="infinity", digits=digits))
+degreeHist = generateTheoreticalDegreeHist(minDegree, maxDegree, type, r=r)
 
-plt.figure()
-plt.plot(alpha, hysteresisTheory, 'k')
-plt.xlabel(r"$\alpha$")
-plt.ylabel("Hysteresis (sup-norm)")
-plt.plot()
-plt.show()
+meanDegree = sum([k*prob for k, prob in degreeHist])
+meanSquaredDegree = sum([k**2*prob for k, prob in degreeHist])
+meanCubedDegree = sum([k**3*prob for k, prob in degreeHist])
+meanSimplexDegree = meanDegree
+
+betaTheory = np.linspace(0.5*meanDegree/meanSquaredDegree*gamma, 1.5*meanDegree/meanSquaredDegree*gamma, 9)
+alphaCrit = calculateTheoreticalCriticalAlpha(gamma, betaTheory, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance)
+print(alphaCrit)
