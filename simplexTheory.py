@@ -157,19 +157,20 @@ def calculateTheoreticalCriticalAlpha(gamma, beta, minAlpha, maxAlpha, degreeHis
     minAlphaHysteresis = calculateTheoreticalHysteresis(gamma, beta, minAlphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits)
     maxAlphaHysteresis = calculateTheoreticalHysteresis(gamma, beta, maxAlphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits)
 
-    if minAlphaHysteresis < 0.0001 and maxAlphaHysteresis > 0.0001:
+    if minAlphaHysteresis < 0.01 and maxAlphaHysteresis > 0.01:
         # Bisection method
         while maxAlphaCrit - minAlphaCrit > tolerance:
             newAlpha = 0.5*(minAlphaCrit + maxAlphaCrit)
             newHysteresis = calculateTheoreticalHysteresis(gamma, beta, newAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits)
-            if newHysteresis < 0.0001:
+            if newHysteresis < 0.01:
                 minAlphaCrit = newAlpha
             else:
                 maxAlphaCrit = newAlpha
-            print("min " + str(minAlphaCrit))
-            print("max " + str(maxAlphaCrit))
+
+        print(0.5*(minAlphaCrit + maxAlphaCrit), flush=True)
         return 0.5*(minAlphaCrit + maxAlphaCrit)
     else:
+        print("NaN", flush=True)
         return float("nan")
 
 def findHysteresisBoundaries(gamma, betaList, alphaList, minDegree, maxDegree, meanSimplexDegree, tolerance, isIndependent=False, type="uniform", r=4):

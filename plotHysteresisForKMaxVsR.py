@@ -16,10 +16,6 @@ maxDegreeList = np.linspace(100, 500, 9)
 rList = np.linspace(3.0,4.0,10)
 
 digits = 4
-tolerance = 0.001
-numBetaPoints = 30
-minAlpha = 0.04
-maxAlpha = 0.08
 m = np.size(maxDegreeList,0)
 n = np.size(rList,0)
 hysteresis = np.zeros([m, n])

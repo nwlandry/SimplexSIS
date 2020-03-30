@@ -128,7 +128,7 @@ def generateSISEquilibria(A, simplexList, simplexIndices, gamma, beta, alpha, x0
     return equilibria
 
 def generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, nodeFractionToRestart, numProcesses, verbose=True):
-    argList = []
+    argList = list()
     for alphaVal in alpha:
         argList.append((A, simplexList, simplexIndices, gamma, beta, alphaVal, x0, timesteps, dt, avgLength, nodeFractionToRestart, verbose))
     with mp.Pool(processes=numProcesses) as pool:
@@ -137,7 +137,7 @@ def generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, bet
     return equilibria
 
 def generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, numProcesses, nodeFractionToRestart, verbose=True):
-    argList = []
+    argList = list()
     n = np.size(adjacencyList[0], axis=0)
     for alphaVal in alpha:
         for i in range(numSimulations):
@@ -152,7 +152,7 @@ def generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, sim
     return averagedEquilibria, equilibria
 
 def runOneCurve(A, simplexList, simplexIndices, gamma, beta, alpha, x, timesteps, dt, avgLength, nodeFractionToRestart, verbose=True):
-    equilibria = []
+    equilibria = list()
     for i in range(len(beta)):
         [sol, x] = microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta[i], alpha, x, timesteps, dt, nodeFractionToRestart)
         equilibria.append(np.mean(sol[-avgLength:-1]))
