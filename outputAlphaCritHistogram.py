@@ -1,5 +1,6 @@
 import simplexTheory
 import visualizeData
+import simplexUtilities
 import simplexContagion
 import pickle
 import matplotlib.pyplot as plt
@@ -14,7 +15,8 @@ isIndependent = False
 type = "power-law"
 minDegree = 50
 maxDegree = 1000
-gamma = 3
+numPoints = 1000
+r = 3
 
 numSimulations = 1000
 numProcesses = 24
@@ -26,7 +28,7 @@ maxAlpha = 0.1
 
 argList = list()
 for i in range(numSimulations):
-    degreeSequence = generatePowerLawDegreeSequence(numPoints, minDegree, maxDegree, r, isRandom=True)
+    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(numPoints, minDegree, maxDegree, r, isRandom=True)
     degreeHist = degreeSequenceToHist(degreeSequence)
 
     meanDegree = sum([k*prob for k, prob in degreeHist])

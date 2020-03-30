@@ -12,16 +12,16 @@ def invCDFPowerLaw(u, minDegree, maxDegree, exponent):
     return (minDegree**(1-exponent) + u*(maxDegree**(1-exponent) - minDegree**(1-exponent)))**(1/(1-exponent))
 
 
-def generatePowerLawDegreeSequence(numPoints, minDegree, maxDegree, gamma, isRandom=True):
+def generatePowerLawDegreeSequence(numPoints, minDegree, maxDegree, exponent, isRandom=True):
     degreeSequence = list()
     if isRandom:
         for i in range(numPoints):
             u = random.uniform(0, 1)
-            degreeSequence.append(round(invCDFPowerLaw(u, minDegree, maxDegree, gamma)))
+            degreeSequence.append(round(invCDFPowerLaw(u, minDegree, maxDegree, exponent)))
         return sorted(degreeSequence)
     else:
         for i in range(numPoints):
-            degreeSequence.append(round(invCDFPowerLaw(i/(numPoints-1), minDegree, maxDegree, gamma)))
+            degreeSequence.append(round(invCDFPowerLaw(i/(numPoints-1), minDegree, maxDegree, exponent)))
         return degreeSequence
 
 
