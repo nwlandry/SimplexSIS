@@ -13,8 +13,8 @@ with open(filename, 'rb') as file:
 
 print(len(data))
 plt.figure()
-c = plt.hist(data, bins=40)
+plt.hist(data, bins=40)
 plt.xlabel(r"$\alpha_{crit}$")
-plt.ylabel("Maximum degree")
+plt.ylabel("Instances")
 plt.plot()
 plt.show()

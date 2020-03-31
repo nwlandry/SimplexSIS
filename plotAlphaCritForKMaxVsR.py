@@ -53,7 +53,7 @@ yMax = data[3]
 alphaCritGrid = data[4]
 
 plt.figure()
-c = plt.imshow(np.flipud(alphaCritGrid), interpolation="bicubic", cmap="Reds", extent=[xMin, xMax, yMin, yMax], aspect="auto")
+c = plt.imshow(np.flipud(alphaCritGrid), interpolation="none", cmap="Reds", extent=[xMin, xMax, yMin, yMax], aspect="auto")
 cbar = plt.colorbar(c)
 cbar.set_label(r"$\alpha_{crit}$", rotation=90)
 plt.xlabel("Power-Law Exponent")

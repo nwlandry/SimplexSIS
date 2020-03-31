@@ -21,11 +21,11 @@ maxAlpha = 0.6
 
 degreeHist = generateTheoreticalDegreeHist(minDegree, maxDegree, type, r=r)
 
-meanDegree = sum([k*prob for k, prob in degreeHist])
-meanSquaredDegree = sum([k**2*prob for k, prob in degreeHist])
-meanCubedDegree = sum([k**3*prob for k, prob in degreeHist])
+meanDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
+meanSquaredDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 2)
 meanSimplexDegree = meanDegree
 
-betaTheory = np.linspace(0.5*meanDegree/meanSquaredDegree*gamma, 1.5*meanDegree/meanSquaredDegree*gamma, 9)
-alphaCrit = calculateTheoreticalCriticalAlpha(gamma, betaTheory, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance)
+minBeta = 0.5*meanDegree/meanSquaredDegree*gamma
+maxBeta = 1.5*meanDegree/meanSquaredDegree*gamma
+alphaCrit = calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance)
 print(alphaCrit)

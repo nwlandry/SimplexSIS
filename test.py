@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datetime import *
 from simplexTheory import *
+import time
+
 
 gamma = 2
 minDegree = 50
@@ -25,19 +27,28 @@ meanSimplexDegree = meanDegree
 print(meanDegree)
 print(meanSquaredDegree)
 print(meanCubedDegree)
-print(sum([prob for k,prob in degreeHist]))
 
 minAlpha = 0
-maxAlpha = 0.6
-betaTheory = np.linspace(0.5*meanDegree/meanSquaredDegree*gamma, 1.5*meanDegree/meanSquaredDegree*gamma, 9)
-alphaCrit = calculateTheoreticalCriticalAlpha(gamma, betaTheory, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=4, tolerance=0.001)
-print(alphaCrit)
-if isIndependent:
-    alphaCrit2 = 4*(meanSquaredDegree*gamma-meanDegree**2)/(meanSquaredDegree*meanSimplexDegree)
-else:
-    alphaCrit2 = meanCubedDegree*meanDegree**2/(meanSquaredDegree**3)*gamma
+maxAlpha = 0.06
+minBeta = 0
+maxBeta = 2*meanDegree/meanSquaredDegree*gamma
+betaTheory = np.linspace(0.5*meanDegree/meanSquaredDegree*gamma, 1.5*meanDegree/meanSquaredDegree*gamma, 30)
+#alphaCrit = calculateTheoreticalCriticalAlpha(gamma, betaTheory, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=4, tolerance=0.001)
+#print(alphaCrit)
+#alphaCrit2 = calculateTheoreticalCriticalAlphaFast(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=None, isIndependent=False, option="infinity", digits=4, tolerance=0.0001)
+alpha = 0.0362
 
-print(alphaCrit2)
+start = time.time()
+orig = calculateTheoreticalHysteresisOriginal(gamma, betaTheory, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, option="infinity", digits=4)
+end = time.time()
+print('The elapsed time is ' + str(end-start) + 's')
+print(orig)
+
+start = time.time()
+test = calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, option="infinity", digits=4, tolerance=0.0001)
+end = time.time()
+print('The elapsed time is ' + str(end-start) + 's')
+print(test)
 
 # fractionAlphaCrit = 1
 #

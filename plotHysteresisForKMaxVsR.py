@@ -9,7 +9,7 @@ from simplexTheory import *
 gamma = 2
 beta = 0.02
 alpha = 0.05
-isIndependent = False
+isIndependent = True
 type = "power-law"
 minDegree = 50
 maxDegreeList = np.linspace(100, 500, 9)
@@ -23,9 +23,9 @@ hysteresis = np.zeros([m, n])
 for i in range(m):
     for j in range(n):
         degreeHist = generateTheoreticalDegreeHist(minDegree, int(maxDegreeList[i]), type, r=rList[j])
-        meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
+        meanSimplexDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
         roots = solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
-        if (isIndependent and len(roots) == 3) or (not isIndependent and len(roots)==2):
+        if len(roots) == 3:
             hysteresis[i][j] = max(roots)-min(roots)
 
 
