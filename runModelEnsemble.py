@@ -25,7 +25,7 @@ meanDegree = 100
 initialFraction = 0.01
 
 #simulation parameters
-numProcesses = 24
+numProcesses = mp.cpu_count()
 numSimulations = 10
 timesteps = 1000
 dt = 0.1

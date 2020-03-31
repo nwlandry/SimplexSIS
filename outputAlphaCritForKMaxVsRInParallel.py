@@ -16,7 +16,7 @@ minDegree = 50
 maxDegreeList = np.linspace(100, 1000, 37)
 rList = np.linspace(2.5,4.0,31)
 
-numProcesses = 24
+numProcesses = mp.cpu_count()
 digits = 4
 tolerance = 0.0001
 minAlpha = 0.0

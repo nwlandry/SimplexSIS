@@ -9,7 +9,7 @@ import pickle
 from datetime import datetime
 import time
 import multiprocessing as mp
-
+import simplexTheory
 # graph parameters
 r = 4 # power law exponent
 minDegree = 66.68
@@ -35,12 +35,16 @@ avgLength = int(0.3*timesteps)
 numBetaPts = 31
 numAlphaPts = 24
 gamma = 2
-alphaCrit = 0.066
+
+tolerance = 0.0001
+minAlpha = 0
+maxAlpha = 0.2
+
 startAlphaCritFraction = 0.5
 endAlphaCritFraction = 1.5
 startBetaCritFraction = 0.5
 endBetaCritFraction = 1.5
-numProcesses = numAlphaPts
+numProcesses = mp.cpu_count()
 
 
 # generate degree sequence and adjacency matrix
@@ -72,6 +76,13 @@ else:
 
 betaCrit = meanDegree/meanSquaredDegree*gamma
 meanSimplexDegree = simplexSize*len(simplexList)/n
+
+degreeHist = simplexTheory.degreeSequenceToHist(degreeSequence)
+
+minBeta = 0.5*betaCrit
+maxBeta = 1.5*betaCrit
+alphaCrit = simplexTheory.calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance)
+
 print("The mean simplex degree is {}".format(meanSimplexDegree))
 
 print("beta critical is " + str(betaCrit))
