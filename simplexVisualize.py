@@ -2,17 +2,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 import simplexTheory
 
-def plotTheoreticalInfectionCurves(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, digits=4):
+def plotTheoreticalInfectionCurves(gamma, beta, alphaCritFractions, alphaCrit, degreeHist, meanSimplexDegree=None, isIndependent=False, digits=4):
     if meanSimplexDegree == None:
         meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
     plt.figure()
-    for betaVal in beta:
-        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
-        for root in roots:
-            plt.scatter(betaVal, root, color='black')
-
-
-    plt.xlabel(r'$\beta$')
+    color = ["green","blue","red"]
+    i = 0
+    for frac in alphaCritFractions:
+        pointNum = 0
+        for betaVal in beta:
+            roots = simplexTheory.solveEquilibrium(gamma, betaVal, frac*alphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
+            for root in roots:
+                if pointNum == 0:
+                    plt.scatter(betaVal, root, color=color[i], label=str(alphaCritFractions[i])+r"$\beta_3^{(crit)}$")
+                else:
+                    plt.scatter(betaVal, root, color=color[i])
+                pointNum = pointNum + 1
+        i = i + 1
+    plt.legend()
+    plt.xlabel(r'$\beta_2$')
     plt.ylabel('infected average')
     plt.show()
 
@@ -26,7 +34,7 @@ def plotTheoreticalAndSimInfectionCurves(equilibrium, gamma, beta, alpha, degree
             plt.scatter(betaVal, root, color='black')
 
     plt.plot(beta, equilibrium, 'o-', color='blue')
-    plt.xlabel(r'$\beta$')
+    plt.xlabel(r'$\beta_2$')
     plt.ylabel('infected average')
     plt.show()
 

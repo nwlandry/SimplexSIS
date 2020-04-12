@@ -2,39 +2,66 @@ from scipy.optimize import fsolve, root
 import matplotlib.pyplot as plt
 import numpy as np
 
-def solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, digits=4):
+def solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, majorityVote=False, digits=4):
 
     if meanSimplexDegree is None:
         meanSimplexDegree = generateMeanDegreeFromHist(degreeHist)
 
-    if isIndependent:
-        return solveIndependentEquilbrium(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=digits)
+    if majorityVote:
+        if isIndependent:
+            return solveIndependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=digits)
+        else:
+            return solveDependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, digits=digits)
     else:
-        return solveDependentEquilbrium(gamma, beta, alpha, degreeHist, digits=digits)
+        if isIndependent:
+            return solveIndependentEquilbriumAtLeastOne(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=digits)
+        else:
+            return solveDependentEquilbriumAtLeastOne(gamma, beta, alpha, degreeHist, digits=digits)
 
-def solveDependentEquilbrium(gamma, beta, alpha, degreeHist, digits=4):
+def solveDependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, digits=4):
     initialGuesses = np.linspace(0, 0.6, 4)
     roots = list()
     for initialGuess in initialGuesses:
-        root, data, ier, msg = fsolve(dependentEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, degreeHist), full_output=True)
+        root, data, ier, msg = fsolve(dependentEquilibriumFunctionMajorityVote, initialGuess,  args=(gamma, beta, alpha, degreeHist), full_output=True)
         if ier == 1:
-            avgInfectionPt = round(calculateMeanInfectedDependent(np.asscalar(root), gamma, beta, alpha, degreeHist), digits)
+            avgInfectionPt = round(calculateMeanInfectedDependentMajorityVote(np.asscalar(root), gamma, beta, alpha, degreeHist), digits)
             if avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
                 roots.append(avgInfectionPt)
     return roots
 
-def solveIndependentEquilbrium(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=4):
+def solveIndependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=4):
     initialGuesses = [[0, 0], [0.1, 0.1], [0.25, 0.25], [0.5, 0.5]]
     roots = list()
     for initialGuess in initialGuesses:
-        result = root(independentEquilibriumFunction, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree))
+        result = root(independentEquilibriumFunctionMajorityVote, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree))
+        avgInfectionPt = round(np.asscalar(result.x[0]), digits)
+        if result.success and avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
+            roots.append(avgInfectionPt)
+    return roots
+
+def solveDependentEquilbriumAtLeastOne(gamma, beta, alpha, degreeHist, digits=4):
+    initialGuesses = np.linspace(0, 0.6, 4)
+    roots = list()
+    for initialGuess in initialGuesses:
+        root, data, ier, msg = fsolve(dependentEquilibriumFunctionAtLeastOne, initialGuess,  args=(gamma, beta, alpha, degreeHist), full_output=True)
+        if ier == 1:
+            avgInfectionPt = round(calculateMeanInfectedDependentAtLeastOne(np.asscalar(root), gamma, beta, alpha, degreeHist), digits)
+            if avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
+                roots.append(avgInfectionPt)
+    return roots
+
+def solveIndependentEquilbriumAtLeastOne(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=4):
+    initialGuesses = [[0, 0], [0.1, 0.1], [0.25, 0.25], [0.5, 0.5]]
+    roots = list()
+    for initialGuess in initialGuesses:
+        result = root(independentEquilibriumFunctionAtLeastOne, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree))
         avgInfectionPt = round(np.asscalar(result.x[0]), digits)
         if result.success and avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
             roots.append(avgInfectionPt)
     return roots
 
 
-def dependentEquilibriumFunction(V, gamma, beta, alpha, degreeHist):
+def dependentEquilibriumFunctionMajorityVote(V, gamma, beta, alpha, degreeHist):
     meanDegree = 0
     sum = 0
     for degreeInfo in degreeHist:
@@ -44,7 +71,7 @@ def dependentEquilibriumFunction(V, gamma, beta, alpha, degreeHist):
         meanDegree = meanDegree + prob*degree
     return 1/meanDegree*sum - V
 
-def independentEquilibriumFunction(vars, gamma, beta, alpha, degreeHist, meanSimplexDegree):
+def independentEquilibriumFunctionMajorityVote(vars, gamma, beta, alpha, degreeHist, meanSimplexDegree):
     # Add this calculation
     U = vars[0]
     V = vars[1]
@@ -56,6 +83,32 @@ def independentEquilibriumFunction(vars, gamma, beta, alpha, degreeHist, meanSim
         prob = degreeInfo[1]
         sumU = sumU + prob*(degree*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + alpha*meanSimplexDegree*U**2)
         sumV = sumV + prob*degree*(degree*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + alpha*meanSimplexDegree*U**2)
+        meanDegree = meanDegree + prob*degree
+
+    return [sumU-U, 1/meanDegree*sumV - V]
+
+def dependentEquilibriumFunctionAtLeastOne(V, gamma, beta, alpha, degreeHist):
+    meanDegree = 0
+    sum = 0
+    for degreeInfo in degreeHist:
+        degree = degreeInfo[0]
+        prob = degreeInfo[1]
+        sum = sum + prob*degree**2*((beta+2*alpha)*V - alpha*V**2)/(gamma + (beta+2*alpha)*degree*V - alpha*degree*V**2)
+        meanDegree = meanDegree + prob*degree
+    return 1/meanDegree*sum - V
+
+def independentEquilibriumFunctionAtLeastOne(vars, gamma, beta, alpha, degreeHist, meanSimplexDegree):
+    # Add this calculation
+    U = vars[0]
+    V = vars[1]
+    meanDegree = 0
+    sumU = 0
+    sumV = 0
+    for degreeInfo in degreeHist:
+        degree = degreeInfo[0]
+        prob = degreeInfo[1]
+        sumU = sumU + prob*(degree*beta*V + 2*alpha*meanSimplexDegree*U - alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + 2*alpha*meanSimplexDegree*U - alpha*meanSimplexDegree*U**2)
+        sumV = sumV + prob*degree*(degree*beta*V + 2*alpha*meanSimplexDegree*U - alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + 2*alpha*meanSimplexDegree*U - alpha*meanSimplexDegree*U**2)
         meanDegree = meanDegree + prob*degree
 
     return [sumU-U, 1/meanDegree*sumV - V]
@@ -97,12 +150,20 @@ def computeMeanPowerOfDegreeFromHist(hist, power):
         meanDegree = meanDegree + degree**power*probability
     return meanDegree
 
-def calculateMeanInfectedDependent(V, gamma, beta, alpha, degreeHist):
+def calculateMeanInfectedDependentMajorityVote(V, gamma, beta, alpha, degreeHist):
     meanInfected = 0
     for degreeInfo in degreeHist:
         probability = degreeInfo[1]
         degree = degreeInfo[0]
         meanInfected = meanInfected + probability*degree*(beta*V + alpha*V**2)/(gamma + beta*degree*V + alpha*degree*V**2)
+    return meanInfected
+
+def calculateMeanInfectedDependentAtLeastOne(V, gamma, beta, alpha, degreeHist):
+    meanInfected = 0
+    for degreeInfo in degreeHist:
+        probability = degreeInfo[1]
+        degree = degreeInfo[0]
+        meanInfected = meanInfected + probability*degree*((beta-2*alpha)*V - alpha*V**2)/(gamma + (beta+2*alpha)*degree*V - alpha*degree*V**2)
     return meanInfected
 
 def calculateMeanInfectedIndependentFromV(V, gamma, beta, alpha, degreeHist, meanSimplexDegree):
@@ -138,23 +199,26 @@ def calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, alpha, degreeHist, m
     minRoots = solveEquilibrium(gamma, minBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
 
     maxRoots = solveEquilibrium(gamma, maxBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
-
     hysteresis = 0
-    if (max(minRoots) < 1e-3 and max(maxRoots) >1e-3) or len(minRoots) == 3:
+    if (max(minRoots) < tolerance and max(maxRoots) > tolerance) or len(minRoots) == 3:
         while maxBeta - minBeta > tolerance:
             newBeta = 0.5*(minBeta + maxBeta)
-            roots = solveEquilibrium(gamma, newBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
+            newRoots = solveEquilibrium(gamma, newBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
 
-            if len(roots) == 3:
+            if len(newRoots) == 3:
                 if option == "infinity":
-                    if max(roots)-min(roots) >= hysteresis:
-                        hysteresis = max(roots)-min(roots)
-                        minBeta = newBeta
-            else:
-                if max(roots) <1e-3:
+                    if max(newRoots) >= hysteresis: # min of the roots is always 0
+                        hysteresis = max(newRoots)
+                        minBeta = newBeta # Because the epidemic fraction increases with increasing beta
+            elif len(newRoots) == 2:
+                testBeta = newBeta - tolerance
+                testRoots = solveEquilibrium(gamma, testBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits) # perturb the solution to see if this is at the end of the branch or not
+                if len(testRoots) == 1:
                     minBeta = newBeta
                 else:
                     maxBeta = newBeta
+            else: # if just the zero solution
+                minBeta = newBeta
         return hysteresis
     else:
         return float("nan")
@@ -170,12 +234,12 @@ def calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlph
 
     maxAlphaHysteresis = calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, maxAlphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits, tolerance=tolerance)
 
-    if minAlphaHysteresis < 0.001 and maxAlphaHysteresis > 0.001:
+    if minAlphaHysteresis < tolerance and maxAlphaHysteresis > tolerance:
         # Bisection method
         while maxAlphaCrit - minAlphaCrit > tolerance:
             newAlpha = 0.5*(minAlphaCrit + maxAlphaCrit)
             newHysteresis = calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, newAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits, tolerance=tolerance)
-            if newHysteresis < 0.001:
+            if newHysteresis == 0:
                 minAlphaCrit = newAlpha
             else:
                 maxAlphaCrit = newAlpha

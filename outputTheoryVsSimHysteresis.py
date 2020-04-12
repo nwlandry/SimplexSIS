@@ -1,4 +1,5 @@
 import simplexUtilities
+import simplexTheory
 import visualizeData
 import simplexContagion
 import pickle
@@ -6,19 +7,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datetime import *
 
-filename = 'Non-Random Degree/equilibriaData_power-law_r=3_dep_nonrandom_degree'
-outputFilename = 'hysteresis_r=3_dep_nonrandom_degree'
-simulationLabel = "Power law, r=3, Dependent (Simulation)"
-theoreticalLabel = "Power law, r=3, Dependent (Theory)"
+filename = 'Non-Random Degree/equilibriaData_uniform_indep_nonrandom_degree'
+outputFilename = 'hysteresis_uniform_indep_nonrandom_degree'
+simulationLabel = "Uniform, Independent (Simulation)"
+theoreticalLabel = "Uniform, Independent (Theory)"
 #filename = 'Archive-Data/equilibriaData11112019-002636'
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 
 gamma = data[0]
 beta = data[1]
-alpha = data[2]
+alphaSim = data[2]
 equilibria = data[3]
 degreeSequence = data[4] # This is the full list of equilibria if it's an ensemble run
+# degreeSequence = data[10]
+
 isIndependent = data[5]
 type = data[6]
 r = data[7]
@@ -36,17 +39,25 @@ else:
     maxDegree = max(degreeSequence)
 
 digits = 5
-numBetaPoints = 60
-numAlphaPoints = 30
+tolerance = 0.0001
+numAlphaPoints = 50
 
-betaTheory = np.linspace(min(beta),max(beta), numBetaPoints)
+meanDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 1)
+meanSquaredDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 2)
+#meanSimplexDegree = meanDegree
+degreeHist = simplexTheory.degreeSequenceToHist(degreeSequence)
+
+betaCrit = meanDegree/meanSquaredDegree*gamma
+minBeta = 0.5*betaCrit
+maxBeta = 1.5*betaCrit
+
 alphaTheory = np.linspace(min(alpha),max(alpha), numAlphaPoints)
 hysteresisTheory = list()
 for a in alphaTheory:
-    hysteresisTheory.append(visualizeData.calculateTheoreticalHysteresis(gamma, betaTheory, a, minDegree, maxDegree, meanSimplexDegree, degreeSequence=degreeSequence, isIndependent=isIndependent, type="power-law", r=r, option="infinity", digits=4))
+    hysteresisTheory.append(simplexTheory.calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, a, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance))
 
 hysteresisSim = list()
-for i in range(len(alpha)):
+for i in range(len(alphaSim)):
     hysteresisSim.append(visualizeData.calculateHysteresis(equilibria[i], beta, option='infinity'))
 
 if not isinstance(degreeSequence[0], list):
@@ -54,18 +65,14 @@ if not isinstance(degreeSequence[0], list):
     meanSquaredDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 2)
     meanCubedDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 3)
 
-if isIndependent:
-    alphaCrit = meanSquaredDegree/(meanDegree**2*meanSimplexDegree)*gamma
-else:
-    alphaCrit = meanCubedDegree*meanDegree**2/(meanSquaredDegree**3)*gamma
+    print(hysteresisTheory)
 
 with open(outputFilename, 'wb') as file:
-    pickle.dump([alpha, hysteresisSim, alphaTheory, hysteresisTheory, simulationLabel, theoreticalLabel, alphaCrit], file)
+    pickle.dump([alphaSim, hysteresisSim, alphaTheory, hysteresisTheory, simulationLabel, theoreticalLabel], file)
 
 plt.figure()
-plt.plot(alpha, hysteresisTheory, 'k', label="Theory")
-plt.plot(alpha, hysteresisSim, 'bo-', label="Simulation")
-plt.scatter(alphaCrit, 0, s=50, color='red')
+plt.plot(alphaTheory, hysteresisTheory, 'k', label="Theory")
+plt.plot(alphaSim, hysteresisSim, 'bo-', label="Simulation")
 plt.xlabel(r"$\alpha$")
 plt.ylabel("Hysteresis (sup-norm)")
 plt.legend()

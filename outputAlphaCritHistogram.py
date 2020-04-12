@@ -20,6 +20,7 @@ r = 3
 
 numSimulations = 1000
 numProcesses = mp.cpu_count()
+print(numProcesses)
 digits = 4
 tolerance = 0.0001
 numBetaPoints = 50
