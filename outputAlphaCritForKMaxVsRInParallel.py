@@ -23,7 +23,7 @@ minAlpha = 0.0
 maxAlpha = 0.1
 m = np.size(maxDegreeList,0)
 n = np.size(rList,0)
-alphaCritGrid = np.zeros([m, n])
+
 argList = list()
 for i in range(m):
     for j in range(n):

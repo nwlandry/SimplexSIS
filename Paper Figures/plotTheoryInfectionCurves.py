@@ -25,14 +25,14 @@ meanSimplexDegree = meanDegree
 
 minAlpha = 0
 maxAlpha = 0.06
-minBeta = 0*meanDegree/meanSquaredDegree*gamma
-maxBeta = 2*meanDegree/meanSquaredDegree*gamma
+minBeta = 0.5*meanDegree/meanSquaredDegree*gamma
+maxBeta = 1.5*meanDegree/meanSquaredDegree*gamma
 numBetaPoints = 50
 
-#alphaCrit = calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance)
-alphaCrit = 0.1
+alphaCrit = calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance)
+
 print(alphaCrit)
-alphaCritFraction = [1.0]
+alphaCritFraction = [0.5, 1.0, 1.5]
 
 beta = np.linspace(minBeta, maxBeta, numBetaPoints)
 simplexVisualize.plotTheoreticalInfectionCurves(gamma, beta, alphaCritFraction, alphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)

@@ -6,7 +6,7 @@ def plotTheoreticalInfectionCurves(gamma, beta, alphaCritFractions, alphaCrit, d
     if meanSimplexDegree == None:
         meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
     plt.figure()
-    color = ["green","blue","red"]
+    color = ["green","blue","red","black","magenta"]
     i = 0
     for frac in alphaCritFractions:
         pointNum = 0

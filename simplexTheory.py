@@ -2,7 +2,10 @@ from scipy.optimize import fsolve, root
 import matplotlib.pyplot as plt
 import numpy as np
 
-def solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, majorityVote=False, digits=4):
+def getPhase(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, majorityVote=True, digits=4):
+    return len(solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, majorityVote=majorityVote, digits=digits))
+
+def solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, majorityVote=True, digits=4):
 
     if meanSimplexDegree is None:
         meanSimplexDegree = generateMeanDegreeFromHist(degreeHist)
@@ -93,7 +96,7 @@ def dependentEquilibriumFunctionAtLeastOne(V, gamma, beta, alpha, degreeHist):
     for degreeInfo in degreeHist:
         degree = degreeInfo[0]
         prob = degreeInfo[1]
-        sum = sum + prob*degree**2*((beta+2*alpha)*V - alpha*V**2)/(gamma + (beta+2*alpha)*degree*V - alpha*degree*V**2)
+        sum = sum + prob*degree**2*((beta + 2*alpha)*V - alpha*V**2)/(gamma + (beta + 2*alpha)*degree*V - alpha*degree*V**2)
         meanDegree = meanDegree + prob*degree
     return 1/meanDegree*sum - V
 
@@ -163,7 +166,7 @@ def calculateMeanInfectedDependentAtLeastOne(V, gamma, beta, alpha, degreeHist):
     for degreeInfo in degreeHist:
         probability = degreeInfo[1]
         degree = degreeInfo[0]
-        meanInfected = meanInfected + probability*degree*((beta-2*alpha)*V - alpha*V**2)/(gamma + (beta+2*alpha)*degree*V - alpha*degree*V**2)
+        meanInfected = meanInfected + probability*degree*((beta + 2*alpha)*V - alpha*V**2)/(gamma + (beta + 2*alpha)*degree*V - alpha*degree*V**2)
     return meanInfected
 
 def calculateMeanInfectedIndependentFromV(V, gamma, beta, alpha, degreeHist, meanSimplexDegree):

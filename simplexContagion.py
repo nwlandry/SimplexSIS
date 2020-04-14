@@ -6,7 +6,7 @@ import multiprocessing as mp
 import math
 import matplotlib.pyplot as plt
 
-def microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, nodeFractionToRestart):
+def microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, nodeFractionToRestart, majorityVote=True):
     """Dynamical system"""
     n = np.shape(x0)[0]
     averageX = np.empty(timesteps)
@@ -30,8 +30,15 @@ def microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, a
                 if X[j] == 0 and alpha != 0:
                     # infect by simplex
                     numInfectedSimplices = 0
+
+                    # Based on the model set the threshold
+                    if majorityVote:
+                        thresholdInfection = 2
+                    else:
+                        thresholdInfection = 1
+
                     for index in simplexIndices[j]:
-                        if sum([X[member] for member in simplexList[index]]) >= 2:
+                        if sum([X[member] for member in simplexList[index]]) >= thresholdInfection:
                             numInfectedSimplices = numInfectedSimplices + 1
                     pInfectBySimplex = 1 - (1 - alpha*dt)**numInfectedSimplices
                     if random.random() <= pInfectBySimplex:
