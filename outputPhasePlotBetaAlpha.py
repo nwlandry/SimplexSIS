@@ -1,6 +1,6 @@
 import simplexTheory
 from simplexTheory import getPhase
-import visualizeData
+import simplexVisualize
 import simplexContagion
 import pickle
 import matplotlib.pyplot as plt

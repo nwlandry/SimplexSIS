@@ -2,116 +2,130 @@ from scipy.optimize import fsolve, root
 import matplotlib.pyplot as plt
 import numpy as np
 
-def getPhase(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, majorityVote=True, digits=4):
-    return len(solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, majorityVote=majorityVote, digits=digits))
+def getPhase(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, majorityVote=True, healing=False, digits=4):
+    return len(solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, majorityVote=majorityVote, healing=healing, digits=digits))
 
-def solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, majorityVote=True, digits=4):
-
+def solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, majorityVote=True, healing=False, digits=4):
     if meanSimplexDegree is None:
         meanSimplexDegree = generateMeanDegreeFromHist(degreeHist)
 
     if majorityVote:
         if isIndependent:
-            return solveIndependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=digits)
+            return solveIndependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing=healing, digits=digits)
         else:
-            return solveDependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, digits=digits)
+            return solveDependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, healing=healing, digits=digits)
     else:
         if isIndependent:
-            return solveIndependentEquilbriumAtLeastOne(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=digits)
+            return solveIndependentEquilbriumIndividual(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing=healing, digits=digits)
         else:
-            return solveDependentEquilbriumAtLeastOne(gamma, beta, alpha, degreeHist, digits=digits)
+            return solveDependentEquilbriumIndividual(gamma, beta, alpha, degreeHist, healing=healing, digits=digits)
 
-def solveDependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, digits=4):
+def solveDependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, healing=False, digits=4):
     initialGuesses = np.linspace(0, 0.6, 4)
     roots = list()
     for initialGuess in initialGuesses:
-        root, data, ier, msg = fsolve(dependentEquilibriumFunctionMajorityVote, initialGuess,  args=(gamma, beta, alpha, degreeHist), full_output=True)
+        root, data, ier, msg = fsolve(dependentEquilibriumFunctionMajorityVote, initialGuess,  args=(gamma, beta, alpha, degreeHist, healing), full_output=True)
         if ier == 1:
-            avgInfectionPt = round(calculateMeanInfectedDependentMajorityVote(np.asscalar(root), gamma, beta, alpha, degreeHist), digits)
+            avgInfectionPt = round(calculateMeanInfectedDependentMajorityVote(np.asscalar(root), gamma, beta, alpha, degreeHist, healing), digits)
             if avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
                 roots.append(avgInfectionPt)
     return roots
 
-def solveIndependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=4):
+def solveIndependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing=False, digits=4):
     initialGuesses = [[0, 0], [0.1, 0.1], [0.25, 0.25], [0.5, 0.5]]
     roots = list()
     for initialGuess in initialGuesses:
-        result = root(independentEquilibriumFunctionMajorityVote, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree))
+        result = root(independentEquilibriumFunctionMajorityVote, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing))
         avgInfectionPt = round(np.asscalar(result.x[0]), digits)
         if result.success and avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
             roots.append(avgInfectionPt)
     return roots
 
-def solveDependentEquilbriumAtLeastOne(gamma, beta, alpha, degreeHist, digits=4):
+def solveDependentEquilbriumIndividual(gamma, beta, alpha, degreeHist, healing=False, digits=4):
     initialGuesses = np.linspace(0, 0.6, 4)
     roots = list()
     for initialGuess in initialGuesses:
-        root, data, ier, msg = fsolve(dependentEquilibriumFunctionAtLeastOne, initialGuess,  args=(gamma, beta, alpha, degreeHist), full_output=True)
+        root, data, ier, msg = fsolve(dependentEquilibriumFunctionIndividual, initialGuess,  args=(gamma, beta, alpha, degreeHist, healing), full_output=True)
         if ier == 1:
-            avgInfectionPt = round(calculateMeanInfectedDependentAtLeastOne(np.asscalar(root), gamma, beta, alpha, degreeHist), digits)
+            avgInfectionPt = round(calculateMeanInfectedDependentIndividual(np.asscalar(root), gamma, beta, alpha, degreeHist, healing), digits)
             if avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
                 roots.append(avgInfectionPt)
     return roots
 
-def solveIndependentEquilbriumAtLeastOne(gamma, beta, alpha, degreeHist, meanSimplexDegree, digits=4):
+def solveIndependentEquilbriumIndividual(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing=False, digits=4):
     initialGuesses = [[0, 0], [0.1, 0.1], [0.25, 0.25], [0.5, 0.5]]
     roots = list()
     for initialGuess in initialGuesses:
-        result = root(independentEquilibriumFunctionAtLeastOne, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree))
+        result = root(independentEquilibriumFunctionIndividual, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing))
         avgInfectionPt = round(np.asscalar(result.x[0]), digits)
         if result.success and avgInfectionPt not in set(roots) and avgInfectionPt <= 1 and avgInfectionPt >= 0:
             roots.append(avgInfectionPt)
     return roots
 
-
-def dependentEquilibriumFunctionMajorityVote(V, gamma, beta, alpha, degreeHist):
+def dependentEquilibriumFunctionMajorityVote(V, gamma, beta, alpha, degreeHist, healing=False):
     meanDegree = 0
     sum = 0
+    if healing:
+        sign = -1
+    else:
+        sign = 1
     for degreeInfo in degreeHist:
         degree = degreeInfo[0]
         prob = degreeInfo[1]
-        sum = sum + prob*degree**2*(beta*V + alpha*V**2)/(gamma + beta*degree*V + alpha*degree*V**2)
+        sum = sum + prob*degree**2*(beta*V + sign*alpha*V**2)/(gamma + beta*degree*V + sign*alpha*degree*V**2)
         meanDegree = meanDegree + prob*degree
     return 1/meanDegree*sum - V
 
-def independentEquilibriumFunctionMajorityVote(vars, gamma, beta, alpha, degreeHist, meanSimplexDegree):
+def independentEquilibriumFunctionMajorityVote(vars, gamma, beta, alpha, degreeHist, meanSimplexDegree, healing=False):
     # Add this calculation
     U = vars[0]
     V = vars[1]
     meanDegree = 0
     sumU = 0
     sumV = 0
+    if healing:
+        sign = -1
+    else:
+        sign = 1
     for degreeInfo in degreeHist:
         degree = degreeInfo[0]
         prob = degreeInfo[1]
-        sumU = sumU + prob*(degree*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + alpha*meanSimplexDegree*U**2)
-        sumV = sumV + prob*degree*(degree*beta*V + alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + alpha*meanSimplexDegree*U**2)
+        sumU = sumU + prob*(degree*beta*V + sign*alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + sign*alpha*meanSimplexDegree*U**2)
+        sumV = sumV + prob*degree*(degree*beta*V + sign*alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + sign*alpha*meanSimplexDegree*U**2)
         meanDegree = meanDegree + prob*degree
 
     return [sumU-U, 1/meanDegree*sumV - V]
 
-def dependentEquilibriumFunctionAtLeastOne(V, gamma, beta, alpha, degreeHist):
+def dependentEquilibriumFunctionIndividual(V, gamma, beta, alpha, degreeHist, healing=False):
     meanDegree = 0
     sum = 0
+    if healing:
+        sign = -1
+    else:
+        sign = 1
     for degreeInfo in degreeHist:
         degree = degreeInfo[0]
         prob = degreeInfo[1]
-        sum = sum + prob*degree**2*((beta + 2*alpha)*V - alpha*V**2)/(gamma + (beta + 2*alpha)*degree*V - alpha*degree*V**2)
+        sum = sum + prob*degree**2*((beta + sign*2*alpha)*V - sign*alpha*V**2)/(gamma + (beta + sign*2*alpha)*degree*V - sign*alpha*degree*V**2)
         meanDegree = meanDegree + prob*degree
     return 1/meanDegree*sum - V
 
-def independentEquilibriumFunctionAtLeastOne(vars, gamma, beta, alpha, degreeHist, meanSimplexDegree):
+def independentEquilibriumFunctionIndividual(vars, gamma, beta, alpha, degreeHist, meanSimplexDegree, healing=False):
     # Add this calculation
     U = vars[0]
     V = vars[1]
     meanDegree = 0
     sumU = 0
     sumV = 0
+    if healing:
+        sign = -1
+    else:
+        sign = 1
     for degreeInfo in degreeHist:
         degree = degreeInfo[0]
         prob = degreeInfo[1]
-        sumU = sumU + prob*(degree*beta*V + 2*alpha*meanSimplexDegree*U - alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + 2*alpha*meanSimplexDegree*U - alpha*meanSimplexDegree*U**2)
-        sumV = sumV + prob*degree*(degree*beta*V + 2*alpha*meanSimplexDegree*U - alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + 2*alpha*meanSimplexDegree*U - alpha*meanSimplexDegree*U**2)
+        sumU = sumU + prob*(degree*beta*V + sign*2*alpha*meanSimplexDegree*U - sign*alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + sign*2*alpha*meanSimplexDegree*U - sign*alpha*meanSimplexDegree*U**2)
+        sumV = sumV + prob*degree*(degree*beta*V + sign*2*alpha*meanSimplexDegree*U - sign*alpha*meanSimplexDegree*U**2)/(gamma + beta*degree*V + sign*2*alpha*meanSimplexDegree*U - sign*alpha*meanSimplexDegree*U**2)
         meanDegree = meanDegree + prob*degree
 
     return [sumU-U, 1/meanDegree*sumV - V]
@@ -153,20 +167,28 @@ def computeMeanPowerOfDegreeFromHist(hist, power):
         meanDegree = meanDegree + degree**power*probability
     return meanDegree
 
-def calculateMeanInfectedDependentMajorityVote(V, gamma, beta, alpha, degreeHist):
+def calculateMeanInfectedDependentMajorityVote(V, gamma, beta, alpha, degreeHist, healing=False):
     meanInfected = 0
+    if healing:
+        sign = -1
+    else:
+        sign = 1
     for degreeInfo in degreeHist:
         probability = degreeInfo[1]
         degree = degreeInfo[0]
-        meanInfected = meanInfected + probability*degree*(beta*V + alpha*V**2)/(gamma + beta*degree*V + alpha*degree*V**2)
+        meanInfected = meanInfected + probability*degree*(beta*V + sign*alpha*V**2)/(gamma + beta*degree*V + sign*alpha*degree*V**2)
     return meanInfected
 
-def calculateMeanInfectedDependentAtLeastOne(V, gamma, beta, alpha, degreeHist):
+def calculateMeanInfectedDependentIndividual(V, gamma, beta, alpha, degreeHist, healing=False):
     meanInfected = 0
+    if healing:
+        sign = -1
+    else:
+        sign = 1
     for degreeInfo in degreeHist:
         probability = degreeInfo[1]
         degree = degreeInfo[0]
-        meanInfected = meanInfected + probability*degree*((beta + 2*alpha)*V - alpha*V**2)/(gamma + (beta + 2*alpha)*degree*V - alpha*degree*V**2)
+        meanInfected = meanInfected + probability*degree*((beta + sign*2*alpha)*V - sign*alpha*V**2)/(gamma + (beta + sign*2*alpha)*degree*V - sign*alpha*degree*V**2)
     return meanInfected
 
 def calculateMeanInfectedIndependentFromV(V, gamma, beta, alpha, degreeHist, meanSimplexDegree):

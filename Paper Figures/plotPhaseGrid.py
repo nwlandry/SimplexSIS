@@ -5,7 +5,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename = "phasePlot04132020-213224"
+filename = "phasePlot04132020-210205"
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 
@@ -16,9 +16,7 @@ yMax = data[3]
 phaseGrid = data[4]
 
 plt.figure()
-c = plt.imshow(np.flipud(phaseGrid), interpolation="none", cmap="Reds", extent=[xMin, xMax, yMin, yMax], aspect="auto")
-#cbar = plt.colorbar(c)
-#cbar.set_label("Phase", rotation=90)
+c = plt.imshow(np.flipud(phaseGrid), interpolation="none", cmap="Reds", extent=[xMin, xMax, yMin, yMax], aspect="auto", vmin=1, vmax=3)
 plt.xlabel(r"$\beta_2$")
 plt.ylabel(r"$\beta_3$")
 plt.plot()

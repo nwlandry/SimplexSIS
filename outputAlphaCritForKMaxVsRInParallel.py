@@ -1,5 +1,5 @@
 import simplexTheory
-import visualizeData
+import simplexVisualize
 import simplexContagion
 import pickle
 import matplotlib.pyplot as plt
@@ -13,8 +13,8 @@ gamma = 2
 isIndependent = True
 type = "power-law"
 minDegree = 50
-maxDegreeList = np.linspace(100, 1000, 37)
-rList = np.linspace(2.5,4.0,31)
+maxDegreeList = np.linspace(100, 1000, 5)
+rList = np.linspace(2.5,4.0,5)
 
 numProcesses = mp.cpu_count()
 digits = 4
