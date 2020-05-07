@@ -21,7 +21,7 @@ def solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isI
             return solveDependentEquilbriumIndividual(gamma, beta, alpha, degreeHist, healing=healing, digits=digits)
 
 def solveDependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, healing=False, digits=4):
-    initialGuesses = np.linspace(0, 0.6, 4)
+    initialGuesses = np.linspace(0, 0.6, 10)
     roots = list()
     for initialGuess in initialGuesses:
         root, data, ier, msg = fsolve(dependentEquilibriumFunctionMajorityVote, initialGuess,  args=(gamma, beta, alpha, degreeHist, healing), full_output=True)
@@ -32,7 +32,7 @@ def solveDependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, healing
     return roots
 
 def solveIndependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing=False, digits=4):
-    initialGuesses = [[0, 0], [0.1, 0.1], [0.25, 0.25], [0.5, 0.5]]
+    initialGuesses = [[val,val] for val in np.linspace(0, 0.6, 10)]
     roots = list()
     for initialGuess in initialGuesses:
         result = root(independentEquilibriumFunctionMajorityVote, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing))
@@ -42,7 +42,7 @@ def solveIndependentEquilbriumMajorityVote(gamma, beta, alpha, degreeHist, meanS
     return roots
 
 def solveDependentEquilbriumIndividual(gamma, beta, alpha, degreeHist, healing=False, digits=4):
-    initialGuesses = np.linspace(0, 0.6, 4)
+    initialGuesses = np.linspace(0, 0.6, 10)
     roots = list()
     for initialGuess in initialGuesses:
         root, data, ier, msg = fsolve(dependentEquilibriumFunctionIndividual, initialGuess,  args=(gamma, beta, alpha, degreeHist, healing), full_output=True)
@@ -53,7 +53,7 @@ def solveDependentEquilbriumIndividual(gamma, beta, alpha, degreeHist, healing=F
     return roots
 
 def solveIndependentEquilbriumIndividual(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing=False, digits=4):
-    initialGuesses = [[0, 0], [0.1, 0.1], [0.25, 0.25], [0.5, 0.5]]
+    initialGuesses = [[val,val] for val in np.linspace(0, 0.6, 10)]
     roots = list()
     for initialGuess in initialGuesses:
         result = root(independentEquilibriumFunctionIndividual, initialGuess,  args=(gamma, beta, alpha, degreeHist, meanSimplexDegree, healing))
@@ -217,6 +217,44 @@ def avgOfPowerLawEqn(minDegree, maxDegree, r, meanDeg):
 def meanPowerOfPowerLaw(minDegree, maxDegree, r, power):
     return (minDegree**(power+1-r)-maxDegree**(power+1-r))*(r-1)/((minDegree**(1-r)-maxDegree**(1-r))*(r-power-1))
 
+def calculateTheoreticalHysteresisVisually(gamma, minBeta, maxBeta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, option="infinity", digits=4, tolerance=0.0001):
+    if meanSimplexDegree == None:
+        meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
+
+    plt.figure()
+    minRoots = solveEquilibrium(gamma, minBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
+
+    maxRoots = solveEquilibrium(gamma, maxBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
+
+    plt.scatter(minBeta, len(minRoots))
+    plt.scatter(maxBeta, len(maxRoots))
+    hysteresis = 0
+    if (max(minRoots) < tolerance and max(maxRoots) > tolerance) or len(minRoots) == 3:
+        while maxBeta - minBeta > tolerance:
+            newBeta = 0.5*(minBeta + maxBeta)
+            newRoots = solveEquilibrium(gamma, newBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
+            plt.scatter(newBeta,len(newRoots))
+            if len(newRoots) == 3:
+                if option == "infinity":
+                    if max(newRoots) >= hysteresis: # min of the roots is always 0
+                        hysteresis = max(newRoots)
+                        minBeta = newBeta # Because the epidemic fraction increases with increasing beta
+            elif len(newRoots) == 2:
+                testBeta = newBeta - tolerance/2.0
+                testRoots = solveEquilibrium(gamma, testBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits) # perturb the solution to see if this is at the end of the branch or not
+                if len(testRoots) == 1:
+                    minBeta = newBeta
+                    # if max(newRoots) >= hysteresis and max(newRoots)>0.1: # min of the roots is always 0
+                    #     hysteresis = max(newRoots)
+                else:
+                    maxBeta = newBeta
+            else: # if just the zero solution
+                minBeta = newBeta
+        plt.show()
+        return hysteresis
+    else:
+        return float("nan")
+
 def calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, alpha, degreeHist, meanSimplexDegree=None, isIndependent=False, option="infinity", digits=4, tolerance=0.0001):
     if meanSimplexDegree == None:
         meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
@@ -236,17 +274,21 @@ def calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, alpha, degreeHist, m
                         hysteresis = max(newRoots)
                         minBeta = newBeta # Because the epidemic fraction increases with increasing beta
             elif len(newRoots) == 2:
-                testBeta = newBeta - tolerance
-                testRoots = solveEquilibrium(gamma, testBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits) # perturb the solution to see if this is at the end of the branch or not
-                if len(testRoots) == 1:
-                    minBeta = newBeta
-                else:
-                    maxBeta = newBeta
+                # testBeta = newBeta - tolerance/2.0
+                # testRoots = solveEquilibrium(gamma, testBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits) # perturb the solution to see if this is at the end of the branch or not
+                # if len(testRoots) == 1:
+                #     minBeta = newBeta
+                #     # if max(newRoots) >= hysteresis and max(newRoots)>0.1: # min of the roots is always 0
+                #     #     hysteresis = max(newRoots)
+                # else:
+                #     maxBeta = newBeta
+                maxBeta = newBeta
             else: # if just the zero solution
                 minBeta = newBeta
         return hysteresis
     else:
         return float("nan")
+
 
 def calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=None, isIndependent=False, option="infinity", digits=4, tolerance=0.0001):
     if meanSimplexDegree == None:
@@ -263,7 +305,7 @@ def calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlph
         # Bisection method
         while maxAlphaCrit - minAlphaCrit > tolerance:
             newAlpha = 0.5*(minAlphaCrit + maxAlphaCrit)
-            newHysteresis = calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, newAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits, tolerance=tolerance)
+            newHysteresis = calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, newAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option=option, digits=digits, tolerance=0.1*tolerance)
             if newHysteresis == 0:
                 minAlphaCrit = newAlpha
             else:
@@ -271,6 +313,7 @@ def calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlph
 
         print(0.5*(minAlphaCrit + maxAlphaCrit), flush=True)
         return 0.5*(minAlphaCrit + maxAlphaCrit)
+        #return minAlphaCrit
     else:
         print("NaN", flush=True)
         return float("nan")

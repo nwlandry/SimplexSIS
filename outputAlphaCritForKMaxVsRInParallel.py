@@ -10,19 +10,21 @@ from datetime import datetime
 import time
 
 gamma = 2
-isIndependent = True
+isIndependent = False
 type = "power-law"
 minDegree = 50
-maxDegreeList = np.linspace(100, 1000, 5)
-rList = np.linspace(2.5,4.0,5)
+maxDegreeList = np.linspace(100, 1000, 37)
+rList = np.linspace(2.5,4.0,31)
 
 numProcesses = mp.cpu_count()
 digits = 4
 tolerance = 0.0001
 minAlpha = 0.0
-maxAlpha = 0.1
+maxAlpha = 0.1*math.pi()/3
 m = np.size(maxDegreeList,0)
 n = np.size(rList,0)
+
+firstOrderAlphaCritGrid = np.zeros([m,n])
 
 argList = list()
 for i in range(m):
@@ -31,7 +33,12 @@ for i in range(m):
 
         meanDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
         meanSquaredDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 2)
+        meanCubedDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 3)
         meanSimplexDegree = meanDegree
+        if isIndependent:
+            firstOrderAlphaCritGrid[i,j] = meanCubedDegree/meanDegree**4*gamma
+        else:
+            firstOrderAlphaCritGrid[i,j] = meanCubedDegree*meanDegree**2/meanSquaredDegree**3*gamma
 
         minBeta = 0.5*meanDegree/meanSquaredDegree*gamma
         maxBeta = 1.5*meanDegree/meanSquaredDegree*gamma
@@ -49,4 +56,4 @@ yMin = np.min(maxDegreeList)
 yMax = np.max(maxDegreeList)
 
 with open('alphaCrit' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([xMin, xMax, yMin, yMax, alphaCritGrid], file)
+    pickle.dump([xMin, xMax, yMin, yMax, alphaCritGrid, firstOrderAlphaCritGrid], file)

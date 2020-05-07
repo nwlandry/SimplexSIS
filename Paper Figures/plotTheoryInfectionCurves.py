@@ -11,12 +11,12 @@ from simplexTheory import *
 import math
 
 gamma = 2
-isIndependent = True
+isIndependent = False
 type = "power-law"
 minDegree = 50
 maxDegree = 450
 r = 4.0
-digits = 6
+digits = 4
 tolerance = 0.0001
 degreeHist = generateTheoreticalDegreeHist(minDegree, maxDegree, type, r=r)
 meanDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
@@ -31,8 +31,7 @@ numBetaPoints = 50
 
 alphaCrit = calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance)
 
-print(alphaCrit)
-alphaCritFraction = [0.5, 1.0, 1.5]
+alphaCritFraction = [1.0]
 
 beta = np.linspace(minBeta, maxBeta, numBetaPoints)
 simplexVisualize.plotTheoreticalInfectionCurves(gamma, beta, alphaCritFraction, alphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
