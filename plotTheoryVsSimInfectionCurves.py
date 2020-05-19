@@ -22,7 +22,7 @@ beta = data[1]
 alpha = data[2]
 equilibria = data[3]
 degreeSequence = data[4] # This is the full list of equilibria if it's an ensemble run
-isIndependent = data[5]
+isDegreeCorrelated = data[5]
 type = data[6]
 r = data[7]
 if len(degreeSequence[0]) != 1: # set degree sequence to none if "degree"
@@ -45,4 +45,4 @@ degreeHist = simplexTheory.degreeSequenceToHist(degreeSequence)
 index = 0
 print(alpha[index])
 
-visualizeData.plotTheoreticalAndSimInfectionCurves(equilibria[index], gamma, beta, alpha[index], degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, digits=digits)
+visualizeData.plotTheoreticalAndSimInfectionCurves(equilibria[index], gamma, beta, alpha[index], degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)

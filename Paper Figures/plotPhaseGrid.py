@@ -5,7 +5,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename = "phasePlot04132020-210205"
+filename = "Paper Figures/phasePlotIndividualDependent"
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 
@@ -17,7 +17,7 @@ phaseGrid = data[4]
 
 plt.figure()
 c = plt.imshow(np.flipud(phaseGrid), interpolation="none", cmap="Reds", extent=[xMin, xMax, yMin, yMax], aspect="auto", vmin=1, vmax=3)
-plt.xlabel(r"$\beta_2$")
-plt.ylabel(r"$\beta_3$")
+plt.xlabel(r"$\beta_2$", fontsize=18)
+plt.ylabel(r"$\beta_3$", fontsize=18)
 plt.plot()
 plt.show()

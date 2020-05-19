@@ -5,8 +5,8 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename = "Paper Figures/alphaCritGridUncorrelated"
-filename = "alphaCrit05072020-230602"
+filename = "Paper Figures/alphaCritDegreeCorrelated"
+#filename = "alphaCrit05122020-004430"
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 
@@ -29,19 +29,35 @@ firstOrderAlphaCritGrid = data[5]
 plt.figure()
 x = np.linspace(xMin, xMax, np.size(alphaCritGrid, axis=1))
 y = np.linspace(yMin, yMax, np.size(alphaCritGrid, axis=0))
-c = plt.contour(x, y, alphaCritGrid, 6)
+c = plt.contour(x, y, alphaCritGrid, 8)
 plt.clabel(c, inline=1, fontsize=10)
 plt.xlabel("Power-Law Exponent")
 plt.ylabel("Maximum degree")
-plt.plot()
 plt.show()
 
 plt.figure()
 x = np.linspace(xMin, xMax, np.size(alphaCritGrid, axis=1))
 y = np.linspace(yMin, yMax, np.size(alphaCritGrid, axis=0))
-c = plt.contour(x, y, firstOrderAlphaCritGrid-alphaCritGrid, 5)
+c = plt.contour(x, y, np.divide(firstOrderAlphaCritGrid-alphaCritGrid,alphaCritGrid), 4)
 plt.clabel(c, inline=1, fontsize=10)
 plt.xlabel("Power-Law Exponent")
 plt.ylabel("Maximum degree")
-plt.plot()
+plt.show()
+
+
+plt.figure()
+c = plt.imshow(np.flipud(alphaCritGrid), interpolation="None", cmap="Reds", extent=[xMin, xMax, yMin, yMax], aspect="auto")
+cbar = plt.colorbar(c)
+cbar.set_label(r"$\alpha_{crit}$", rotation=90)
+plt.xlabel("Power-Law Exponent")
+plt.ylabel("Maximum degree")
+plt.show()
+
+
+plt.figure()
+c = plt.imshow(np.flipud(np.divide(firstOrderAlphaCritGrid-alphaCritGrid,alphaCritGrid)), interpolation="None", cmap="Reds", extent=[xMin, xMax, yMin, yMax], aspect="auto")
+cbar = plt.colorbar(c)
+cbar.set_label(r"$\alpha_{crit}$", rotation=90)
+plt.xlabel("Power-Law Exponent")
+plt.ylabel("Maximum degree")
 plt.show()

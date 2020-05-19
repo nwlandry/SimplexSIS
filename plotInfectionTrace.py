@@ -11,44 +11,71 @@ import time
 import multiprocessing as mp
 
 # graph parameters
+# graph parameters
 r = 4 # power law exponent
-minDegree = 66.68
+minDegree = 50.3
 maxDegree = 1000
 n = 1000
 simplexSize = 3
-isIndependentUniform = False
+isDegreeCorrelated = True
 degreeDistType = "power-law"
-meanSimplexDegree = 100
-meanDegree = 100
-
+meanSimplexDegree = 10
+meanDegree = 10
+isRandom = True
 
 # Epidemic parameters
-initialFraction = 0.1
-x01 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
-initialFraction = 0.4
-x02 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
-initialConditions = [x01, x02]
+initialFraction = 0.06
+
 #simulation parameters
 timesteps = 1000
 dt = 0.1
-alpha = 0.06
-betaCritFraction = 0.7
+nodeFractionToRestart = 0.02
 gamma = 2
+
+tolerance = 0.0001
+alpha = 0
+betaCritFraction = 1.5
+
+# Epidemic parameters
+initialFraction = 0.01
+x01 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
+initialFraction = 1
+x02 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
+initialConditions = [x01, x02]
 
 # generate degree sequence and adjacency matrix
 if degreeDistType == "uniform":
-    k = simplexUtilities.generateUniformDegreeSequence(n, minDegree, maxDegree)
+    degreeSequence = simplexUtilities.generateUniformDegreeSequence(n, minDegree, maxDegree, isRandom=isRandom)
 elif degreeDistType == "power-law":
-    k = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, r)
+    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, r, isRandom=isRandom)
 elif degreeDistType == "poisson":
-    k = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
+    degreeSequence = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
 
-A = simplexUtilities.generateConfigModelAdjacency(k)
+A = simplexUtilities.generateConfigModelAdjacency(degreeSequence)
 
 # Calculate values needed in critical value calculation
-meanDegree = simplexUtilities.meanPowerOfDegree(k, 1)
-meanSquaredDegree =  simplexUtilities.meanPowerOfDegree(k, 2)
-meanCubedDegree =  simplexUtilities.meanPowerOfDegree(k, 3)
+meanDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 1)
+meanSquaredDegree =  simplexUtilities.meanPowerOfDegree(degreeSequence, 2)
+meanCubedDegree =  simplexUtilities.meanPowerOfDegree(degreeSequence, 3)
+
+print("The mean degree is {:.2f}".format(meanDegree))
+print("The mean squared degree is {:.2f}".format(meanSquaredDegree))
+print("The mean cubed degree is {:.2f}".format(meanCubedDegree))
+print("{} self-loops".format(np.trace(A.todense())))
+
+
+#Generate simplex list
+if isDegreeCorrelated:
+    [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(degreeSequence, simplexSize)
+else:
+    [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
+
+A = simplexUtilities.generateConfigModelAdjacency(degreeSequence)
+
+# Calculate values needed in critical value calculation
+meanDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 1)
+meanSquaredDegree =  simplexUtilities.meanPowerOfDegree(degreeSequence, 2)
+meanCubedDegree =  simplexUtilities.meanPowerOfDegree(degreeSequence, 3)
 
 print("The mean degree is {:.2f}".format(meanDegree))
 print("The mean squared degree is {:.2f}".format(meanSquaredDegree))
@@ -57,21 +84,13 @@ print("The mean simplex degree is {}".format(meanSimplexDegree))
 
 print("{} self-loops".format(np.trace(A.todense())))
 
-
-#Generate simplex list
-if isIndependentUniform:
-    [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
-else:
-    [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(k, simplexSize)
-    # epidemic parameters
-
 betaCrit = meanDegree/meanSquaredDegree*gamma
 beta = betaCritFraction*betaCrit
 
 plt.figure()
 start = time.time()
 for x0 in initialConditions:
-    averageInfection, endState = simplexContagion.microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt)
+    averageInfection, endState = simplexContagion.microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, nodeFractionToRestart)
     plt.plot(np.linspace(0, (timesteps-1)*dt, timesteps), averageInfection)
 
 end = time.time()

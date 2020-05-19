@@ -1,22 +1,19 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.sparse import csr_matrix
-from scipy.sparse.linalg import eigs
 import random
 import simplexUtilities
 import simplexContagion
 import pickle
 from datetime import datetime
 import time
-import multiprocessing as mp
 import simplexTheory
+import os
+
 # graph parameters
 r = 4 # power law exponent
 minDegree = 66.68
 maxDegree = 10000
 n = 10000
 simplexSize = 3
-isIndependent = True
+isDegreeCorrelated = True
 degreeDistType = "power-law"
 meanSimplexDegree = 100
 meanDegree = 100
@@ -27,24 +24,26 @@ initialFraction = 0.01
 x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
 
 #simulation parameters
+numProcesses = len(os.sched_getaffinity(0))
+print("Number of cores is " + str(numprocesses))
 timesteps = 1000
 dt = 0.1
 nodeFractionToRestart = 0.002
 # length over which to average
 avgLength = int(0.3*timesteps)
 numBetaPts = 31
-numAlphaPts = 24
+numAlphaPts = numProcesses #24
 gamma = 2
 
 tolerance = 0.0001
 minAlpha = 0
-maxAlpha = 0.2
+maxAlpha = 0.1
+digits = 4
 
 startAlphaCritFraction = 0.5
 endAlphaCritFraction = 1.5
 startBetaCritFraction = 0.5
 endBetaCritFraction = 1.5
-numProcesses = mp.cpu_count()
 
 
 # generate degree sequence and adjacency matrix
@@ -69,10 +68,10 @@ print("{} self-loops".format(np.trace(A.todense())))
 
 
 #Generate simplex list
-if isIndependent:
-    [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
-else:
+if isDegreeCorrelated:
     [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(degreeSequence, simplexSize)
+else:
+    [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
 
 betaCrit = meanDegree/meanSquaredDegree*gamma
 meanSimplexDegree = simplexSize*len(simplexList)/n
@@ -81,20 +80,21 @@ degreeHist = simplexTheory.degreeSequenceToHist(degreeSequence)
 
 minBeta = 0.5*betaCrit
 maxBeta = 1.5*betaCrit
-alphaCrit = simplexTheory.calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance)
+alphaCrit = simplexTheory.calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance)
 
 print("The mean simplex degree is {}".format(meanSimplexDegree))
 
 print("beta critical is " + str(betaCrit))
+print("alpha critical is " + str(alphaCrit))
 
 beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFraction*betaCrit, numBetaPts),
                       np.linspace(betaCrit*(endBetaCritFraction-(endBetaCritFraction-startBetaCritFraction)/(numBetaPts-1)), startBetaCritFraction*betaCrit, numBetaPts-1)])
 alpha = np.linspace(startAlphaCritFraction*alphaCrit, endAlphaCritFraction*alphaCrit, numAlphaPts)
 
 start = time.time()
-equilibria = simplexContagion.generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numProcesses, nodeFractionToRestart)
+equilibria = simplexContagion.generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, nodeFractionToRestart, numProcesses)
 end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 
 with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([gamma, beta, alpha, equilibria, degreeSequence, isIndependent, degreeDistType, r, meanSimplexDegree], file)
+    pickle.dump([gamma, beta, alpha, equilibria, degreeSequence, isDegreeCorrelated, degreeDistType, r, meanSimplexDegree], file)

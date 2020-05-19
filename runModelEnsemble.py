@@ -9,6 +9,7 @@ import pickle
 from datetime import datetime
 import time
 import multiprocessing as mp
+import os
 
 # graph parameters
 r = 4 # power law exponent
@@ -16,7 +17,7 @@ minDegree = 66.95
 maxDegree = 1000
 n = 1000
 simplexSize = 3
-isIndependentUniform = True
+isDegreeCorrelated = True
 degreeDistType = "power-law"
 meanSimplexDegree = 100
 meanDegree = 100
@@ -25,7 +26,7 @@ meanDegree = 100
 initialFraction = 0.01
 
 #simulation parameters
-numProcesses = mp.cpu_count()
+numProcesses = len(os.sched_getaffinity(0))
 numSimulations = 10
 timesteps = 1000
 dt = 0.1
@@ -45,9 +46,9 @@ degreeSequenceList = list()
 adjacencyList = list()
 for i in range(numSimulations):
     if degreeDistType == "uniform":
-        degreeSequence = simplexUtilities.generateUniformDegreeSequence(n, minDegree, maxDegree)
+        degreeSequence = simplexUtilities.generateUniformDegreeSequence(n, minDegree, maxDegree, isRandom=isRandom)
     elif degreeDistType == "power-law":
-        degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, r)
+        degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, r, isRandom=isRandom)
     elif degreeDistType == "poisson":
         degreeSequence = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
     degreeSequenceList.append(degreeSequence)
@@ -77,14 +78,10 @@ simplexSetList = list()
 simplexIndicesList = list()
 
 for i in range(numSimulations):
-    if isIndependentUniform:
-        [simplexSet, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
-        simplexSetList.append(simplexSet)
-        simplexIndicesList.append(simplexIndices)
+    if isDegreeCorrelated:
+        [simplexList, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(degreeSequence, simplexSize)
     else:
-        [simplexSet, simplexIndices] = simplexUtilities.generateConfigModelSimplexList(degreeSequence, simplexSize)
-        simplexSetList.append(simplexSet)
-        simplexIndicesList.append(simplexIndices)
+        [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
 
 
 
@@ -98,4 +95,4 @@ end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 
 with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([gamma, beta, alpha, averagedEquilibria, equilibria, isIndependent, degreeDistType, r, meanDegree, meanSquaredDegree, meanCubedDegree, meanSimplexDegree, minDegree, maxDegree], file)
+    pickle.dump([gamma, beta, alpha, averagedEquilibria, equilibria, isDegreeCorrelated, degreeDistType, r, meanDegree, meanSquaredDegree, meanCubedDegree, meanSimplexDegree, minDegree, maxDegree], file)

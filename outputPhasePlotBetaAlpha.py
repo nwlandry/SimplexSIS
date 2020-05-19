@@ -9,14 +9,16 @@ from simplexTheory import *
 import multiprocessing as mp
 from datetime import datetime
 import time
+import os
 
 gamma = 2
-isIndependent = True
+isDegreeCorrelated = True
 type = "power-law"
-minDegree = 50
-maxDegree = 100
+minDegree = 67
+maxDegree = 450
 r = 4.0
 majorityVote = True
+healing = False
 
 degreeHist = generateTheoreticalDegreeHist(minDegree, maxDegree, type, r=r)
 
@@ -29,10 +31,10 @@ maxBeta = 1.5*meanDegree/meanSquaredDegree*gamma
 beta = np.linspace(minBeta, maxBeta, 51)
 
 minAlpha = 0.0
-maxAlpha = 0.1
+maxAlpha = 0.06
 alpha = np.linspace(minAlpha, maxAlpha, 51)
 
-numProcesses = mp.cpu_count()
+numProcesses = len(os.sched_getaffinity(0))
 digits = 4
 tolerance = 0.0001
 
@@ -43,7 +45,7 @@ argList = list()
 
 for i in range(m):
     for j in range(n):
-        argList.append((gamma, beta[j], alpha[i], degreeHist, meanSimplexDegree, isIndependent, majorityVote, digits))
+        argList.append((gamma, beta[j], alpha[i], degreeHist, meanSimplexDegree, isDegreeCorrelated, majorityVote, healing, digits))
 
 with mp.Pool(processes=numProcesses) as pool:
     phaseGridList = pool.starmap(getPhase, argList)

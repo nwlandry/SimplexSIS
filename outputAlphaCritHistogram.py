@@ -11,7 +11,7 @@ from datetime import datetime
 import time
 
 gamma = 2
-isIndependent = False
+isDegreeCorrelated = False
 type = "power-law"
 minDegree = 50
 maxDegree = 1000
@@ -38,7 +38,7 @@ for i in range(numSimulations):
 
     betaTheory = np.linspace(0.5*meanDegree/meanSquaredDegree*gamma, 1.5*meanDegree/meanSquaredDegree*gamma, numBetaPoints)
 
-    argList.append((gamma, betaTheory, minAlpha, maxAlpha, degreeHist, meanSimplexDegree, isIndependent, "infinity", digits, tolerance))
+    argList.append((gamma, betaTheory, minAlpha, maxAlpha, degreeHist, meanSimplexDegree, isDegreeCorrelated, digits, tolerance))
 
 with mp.Pool(processes=numProcesses) as pool:
     alphaCritList = pool.starmap(calculateTheoreticalCriticalAlpha, argList)

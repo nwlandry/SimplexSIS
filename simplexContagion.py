@@ -14,9 +14,10 @@ def microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, a
     for i in range(timesteps-1):
         averageX[i] = np.mean(X)
         if averageX[i] == 0:
+            # Restart a fraction of the population if the infection dies out
             X[random.sample(range(n), int(nodeFractionToRestart*n))] = 1
 
-        pInfectByNeighbors = 1-np.power(1-beta*dt, A*X)
+        pInfectByNeighbors = 1-np.power(1-beta*dt, A.dot(X))
         for j in range(n):
             if X[j]==1:
                 # heal
@@ -143,7 +144,7 @@ def generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, bet
 
     return equilibria
 
-def generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, numProcesses, nodeFractionToRestart, verbose=True):
+def generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, nodeFractionToRestart, numProcesses, verbose=True):
     argList = list()
     n = np.size(adjacencyList[0], axis=0)
     for alphaVal in alpha:

@@ -1,6 +1,6 @@
 import simplexUtilities
 import simplexTheory
-import visualizeData
+import simplexVisualize
 import simplexContagion
 import pickle
 import matplotlib.pyplot as plt
@@ -20,9 +20,7 @@ beta = data[1]
 alphaSim = data[2]
 equilibria = data[3]
 degreeSequence = data[4] # This is the full list of equilibria if it's an ensemble run
-# degreeSequence = data[10]
-
-isIndependent = data[5]
+isDegreeCorrelated = data[5]
 type = data[6]
 r = data[7]
 if isinstance(degreeSequence[0], list) : # set degree sequence to none if "degree"
@@ -52,27 +50,20 @@ minBeta = 0.5*betaCrit
 maxBeta = 1.5*betaCrit
 
 alphaTheory = np.linspace(min(alpha),max(alpha), numAlphaPoints)
-hysteresisTheory = list()
+bistabilityTheory = list()
 for a in alphaTheory:
-    hysteresisTheory.append(simplexTheory.calculateTheoreticalHysteresis(gamma, minBeta, maxBeta, a, degreeHist, meanSimplexDegree=meanSimplexDegree, isIndependent=isIndependent, option="infinity", digits=digits, tolerance=tolerance))
+    hysteresisTheory.append(simplexTheory.calculateTheoreticalBistability(gamma, minBeta, maxBeta, a, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance))
 
-hysteresisSim = list()
+bistabilitySim = list()
 for i in range(len(alphaSim)):
-    hysteresisSim.append(visualizeData.calculateHysteresis(equilibria[i], beta, option='infinity'))
-
-if not isinstance(degreeSequence[0], list):
-    meanDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 1)
-    meanSquaredDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 2)
-    meanCubedDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 3)
-
-    print(hysteresisTheory)
+    hysteresisSim.append(visualizeData.calculateBistability(equilibria[i], beta, option='infinity'))
 
 with open(outputFilename, 'wb') as file:
-    pickle.dump([alphaSim, hysteresisSim, alphaTheory, hysteresisTheory, simulationLabel, theoreticalLabel], file)
+    pickle.dump([alphaSim, bistabilitySim, alphaTheory, bistabilityTheory, simulationLabel, theoreticalLabel], file)
 
 plt.figure()
-plt.plot(alphaTheory, hysteresisTheory, 'k', label="Theory")
-plt.plot(alphaSim, hysteresisSim, 'bo-', label="Simulation")
+plt.plot(alphaTheory, bistabilityTheory, 'k', label="Theory")
+plt.plot(alphaSim, bistabilitySim, 'bo-', label="Simulation")
 plt.xlabel(r"$\alpha$")
 plt.ylabel("Hysteresis (sup-norm)")
 plt.legend()
