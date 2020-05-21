@@ -6,8 +6,8 @@ import simplexVisualize
 
 
 filename = 'equilibriaData_power-law_r=3_dep_nonrandom_degree'
-filename = 'Non-Random Degree/equilibriaData_power-law_r=4_dep_nonrandom_degree'
-filename = 'equilibriaData05172020-013422'
+filename = 'Non-Random Degree/equilibriaData_power-law_r=3_dep_nonrandom_degree'
+#filename = 'equilibriaData05172020-013422'
 #filename = 'equilibriaData03042020-165346'
 #filename = 'Poster/uniform_dep'
 with open(filename, 'rb') as file:
@@ -30,7 +30,7 @@ plt.show()
 
 bistability = []
 for i in range(len(alpha)):
-    hysteresis.append(simplexVisualize.calculateBistability(equilibria[i], beta, option='infinity'))
+    bistability.append(simplexVisualize.calculateBistability(equilibria[i], beta, option='infinity'))
 
 plt.figure()
 plt.plot(alpha, bistability, 'o-', label="Hysteresis")

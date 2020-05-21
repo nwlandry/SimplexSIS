@@ -15,4 +15,4 @@ module load slurm/blanca
 source /curc/sw/anaconda3/2019.03/bin/activate
 conda activate idp
 
-python runModelInParallel.py
+python runModelInParallel.py "power-law" 33.32 500 10000 False 50 4

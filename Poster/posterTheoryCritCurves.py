@@ -1,16 +1,18 @@
+import sys
+sys.path.insert(1, 'C:/Users/nicho/Documents/GitHub/SimplexSIS')
 import simplexTheory
-import visualizeData
+import simplexVisualize
 import simplexContagion
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import fsolve
 
-powers = np.linspace(3.001,6,100)
+powers = np.linspace(4.001,6,100)
 depAlphaCrit = list()
 indepAlphaCrit = list()
-n = 1000
-meanDegreeTarget = 100
+n = 500
+meanDegreeTarget = 50
 initialGuess = 0.1
 gamma = 2
 

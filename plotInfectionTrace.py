@@ -14,14 +14,14 @@ import multiprocessing as mp
 # graph parameters
 r = 4 # power law exponent
 minDegree = 50.3
-maxDegree = 1000
+maxDegree = 100
 n = 1000
 simplexSize = 3
 isDegreeCorrelated = True
 degreeDistType = "power-law"
 meanSimplexDegree = 10
 meanDegree = 10
-isRandom = True
+isRandom = False
 
 # Epidemic parameters
 initialFraction = 0.06

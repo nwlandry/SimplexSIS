@@ -13,8 +13,8 @@ import simplexTheory
 import os
 
 n = 10000
-minDegree = 50
-maxDegree = n
+minDegree = 25.65
+maxDegree = n/20
 
 degreeSequenceRandom = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, 3, isRandom=True)
 

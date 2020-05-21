@@ -46,13 +46,11 @@ meanSquaredDegree = simplexUtilities.meanPowerOfDegree(degreeSequence, 2)
 degreeHist = simplexTheory.degreeSequenceToHist(degreeSequence)
 
 betaCrit = meanDegree/meanSquaredDegree*gamma
-minBeta = 0.5*betaCrit
-maxBeta = 1.5*betaCrit
 
 alphaTheory = np.linspace(min(alpha),max(alpha), numAlphaPoints)
 bistabilityTheory = list()
 for a in alphaTheory:
-    hysteresisTheory.append(simplexTheory.calculateTheoreticalBistability(gamma, minBeta, maxBeta, a, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance))
+    hysteresisTheory.append(simplexTheory.calculateTheoreticalBistability(gamma, betaCrit, a, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance))
 
 bistabilitySim = list()
 for i in range(len(alphaSim)):

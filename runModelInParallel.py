@@ -6,18 +6,20 @@ from datetime import datetime
 import time
 import simplexTheory
 import os
+import sys
+import numpy as np
 
 # graph parameters
-r = 4 # power law exponent
-minDegree = 66.68
-maxDegree = 10000
-n = 10000
-simplexSize = 3
-isDegreeCorrelated = True
-degreeDistType = "power-law"
-meanSimplexDegree = 100
-meanDegree = 100
+degreeDistType = sys.argv[1]
+minDegree = float(sys.argv[2])
+maxDegree = float(sys.argv[3])
+n = int(sys.argv[4])
+isDegreeCorrelated = (sys.argv[5] == "True")
+meanSimplexDegree = float(sys.argv[6])
+r = float(sys.argv[7]) # power law exponent
 isRandom = False
+simplexSize = 3
+meanDegree = 50
 
 # Epidemic parameters
 initialFraction = 0.01
@@ -25,26 +27,26 @@ x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
 
 #simulation parameters
 numProcesses = len(os.sched_getaffinity(0))
-print("Number of cores is " + str(numprocesses))
+print("Number of cores is " + str(numProcesses))
 timesteps = 1000
 dt = 0.1
-nodeFractionToRestart = 0.002
+nodeFractionToRestart = 0.001
 # length over which to average
 avgLength = int(0.3*timesteps)
 numBetaPts = 31
-numAlphaPts = numProcesses #24
+numAlphaPts = numProcesses
 gamma = 2
 
 tolerance = 0.0001
+option = "fast"
 minAlpha = 0
-maxAlpha = 0.1
-digits = 4
+maxAlpha = 0.2
+digits = 5
 
 startAlphaCritFraction = 0.5
 endAlphaCritFraction = 1.5
 startBetaCritFraction = 0.5
 endBetaCritFraction = 1.5
-
 
 # generate degree sequence and adjacency matrix
 if degreeDistType == "uniform":
@@ -78,12 +80,9 @@ meanSimplexDegree = simplexSize*len(simplexList)/n
 
 degreeHist = simplexTheory.degreeSequenceToHist(degreeSequence)
 
-minBeta = 0.5*betaCrit
-maxBeta = 1.5*betaCrit
-alphaCrit = simplexTheory.calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance)
+alphaCrit = simplexTheory.calculateTheoreticalCriticalAlpha(gamma, betaCrit, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance, option=option)
 
 print("The mean simplex degree is {}".format(meanSimplexDegree))
-
 print("beta critical is " + str(betaCrit))
 print("alpha critical is " + str(alphaCrit))
 

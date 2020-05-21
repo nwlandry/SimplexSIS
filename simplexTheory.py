@@ -260,111 +260,122 @@ def calculateTheoreticalBistabilityVisually(gamma, minBeta, maxBeta, alpha, degr
     else:
         return float("nan")
 
-def calculateTheoreticalBistability(gamma, minBeta, maxBeta, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, digits=4, tolerance=0.0001, stopAtBistability=False):
+def calculateTheoreticalBistability(gamma, betaCrit, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, digits=4, tolerance=0.0001, stopAtBistability=False, option="fast"):
     if meanSimplexDegree == None:
         meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
 
-    minRoots = solveEquilibrium(gamma, minBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
+    minBeta = 0.5*betaCrit
+    maxBeta = 1.5*betaCrit
 
-    maxRoots = solveEquilibrium(gamma, maxBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
-    bistabilityIndex = 0
-    if (max(minRoots) < tolerance and max(maxRoots) > tolerance) or len(minRoots) == 3:
-        while maxBeta - minBeta > tolerance:
-            newBeta = 0.5*(minBeta + maxBeta)
-            newRoots = solveEquilibrium(gamma, newBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
+    if option =="fast":
+        roots = solveEquilibrium(gamma, betaCrit-tolerance, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
+        if len(roots) == 3:
+            return max(roots)
+        else:
+            return 0
 
-            if len(newRoots) == 3:
-                if max(newRoots) >= bistabilityIndex: # min of the roots is always 0
-                    bistabilityIndex = max(newRoots)
-                    if stopAtBistability: # Stop if there is bistability to save time
-                        break
-                    minBeta = newBeta # Because the epidemic fraction increases with increasing beta
-            elif len(newRoots) == 2:
-                # taking care of the singularity case
-                testBeta = newBeta + tolerance
-                testRoots = solveEquilibrium(gamma, testBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
-                if len(testRoots) == 3:
-                    minBeta = newBeta
-                    if stopAtBistability:
-                        bistabilityIndex = max(testRoots)
-                        break
-                else:
-                    maxBeta = newBeta
-            else: # if just the zero solution
-                minBeta = newBeta
-        return bistabilityIndex
-    else:
-        return float("nan")
+    elif option == "bisection":
+        minRoots = solveEquilibrium(gamma, minBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
 
-def calculateTheoreticalBistabilityTrisection(gamma, minBeta, maxBeta, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, digits=4, tolerance=0.0001, stopAtBistability=False):
-    if meanSimplexDegree == None:
-        meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
-
-    minRoots = solveEquilibrium(gamma, minBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
-
-    maxRoots = solveEquilibrium(gamma, maxBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
-    bistabilityIndex = 0
-
-    if len(minRoots) == 3:
-        bistabilityIndex = max(minRoots)
-    elif (max(minRoots) < tolerance and max(maxRoots) > tolerance):
+        maxRoots = solveEquilibrium(gamma, maxBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
         bistabilityIndex = 0
-    else:
-        return float("nan")
+        if (max(minRoots) < tolerance and max(maxRoots) > tolerance) or len(minRoots) == 3:
+            while maxBeta - minBeta > tolerance:
+                newBeta = 0.5*(minBeta + maxBeta)
+                newRoots = solveEquilibrium(gamma, newBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
 
-    while maxBeta - minBeta > tolerance:
-        newMinBeta = 2/3*minBeta + 1/3*maxBeta
-        newMaxBeta = 1/3*minBeta + 2/3*maxBeta
-        newMinRoots = solveEquilibrium(gamma, newMinBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
-        newMaxRoots = solveEquilibrium(gamma, newMaxBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
+                if len(newRoots) == 3:
+                    if max(newRoots) >= bistabilityIndex: # min of the roots is always 0
+                        bistabilityIndex = max(newRoots)
+                        if stopAtBistability: # Stop if there is bistability to save time
+                            break
+                        minBeta = newBeta # Because the epidemic fraction increases with increasing beta
+                elif len(newRoots) == 2:
+                    # taking care of the singularity case
+                    testBeta = newBeta + tolerance
+                    testRoots = solveEquilibrium(gamma, testBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
+                    if len(testRoots) == 3:
+                        minBeta = newBeta
+                        if stopAtBistability:
+                            bistabilityIndex = max(testRoots)
+                            break
+                    else:
+                        maxBeta = newBeta
+                else: # if just the zero solution
+                    minBeta = newBeta
+            return bistabilityIndex
+        else:
+            return float("nan")
+
+    elif option == "trisection":
+        minRoots = solveEquilibrium(gamma, minBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
+
+        maxRoots = solveEquilibrium(gamma, maxBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
+        bistabilityIndex = 0
+
+        if len(minRoots) == 3:
+            bistabilityIndex = max(minRoots)
+        elif (max(minRoots) < tolerance and max(maxRoots) > tolerance):
+            bistabilityIndex = 0
+        else:
+            return float("nan")
+
+        while maxBeta - minBeta > tolerance:
+            newMinBeta = 2/3*minBeta + 1/3*maxBeta
+            newMaxBeta = 1/3*minBeta + 2/3*maxBeta
+            newMinRoots = solveEquilibrium(gamma, newMinBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
+            newMaxRoots = solveEquilibrium(gamma, newMaxBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
 
 
-        if len(newMinRoots) == 1 and len(newMaxRoots) == 1:
-            minBeta = newMaxBeta
-        elif len(newMinRoots) == 1 and len(newMaxRoots) == 2:
-            minBeta = newMinBeta
-        elif len(newMinRoots) == 1 and len(newMaxRoots) == 3:
-            if stopAtBistability:
+            if len(newMinRoots) == 1 and len(newMaxRoots) == 1:
+                minBeta = newMaxBeta
+            elif len(newMinRoots) == 1 and len(newMaxRoots) == 2:
+                minBeta = newMinBeta
+            elif len(newMinRoots) == 1 and len(newMaxRoots) == 3:
+                if stopAtBistability:
+                    bistabilityIndex = max(newMaxRoots)
+                    break
+                minBeta = newMaxBeta
+            elif len(newMinRoots) == 2 and len(newMaxRoots) == 2:
+                maxBeta = newMaxBeta
+            elif len(newMinRoots) == 2 and len(newMaxRoots) == 3:
                 bistabilityIndex = max(newMaxRoots)
-                break
-            minBeta = newMaxBeta
-        elif len(newMinRoots) == 2 and len(newMaxRoots) == 2:
-            maxBeta = newMaxBeta
-        elif len(newMinRoots) == 2 and len(newMaxRoots) == 3:
-            bistabilityIndex = max(newMaxRoots)
-            if stopAtBistability:
-                break
-            minBeta = newMaxBeta
-        elif len(newMinRoots) == 3 and len(newMaxRoots) == 2:
-            bistabilityIndex = max(newMinRoots)
-            if stopAtBistability:
-                break
-            minBeta = newMinBeta
-            maxBeta = newMaxBeta
-        elif len(newMinRoots) == 3 and len(newMaxRoots) == 3:
-            bistabilityIndex = max(newMaxRoots)
-            if stopAtBistability:
-                break
-            minBeta = newMaxBeta
+                if stopAtBistability:
+                    break
+                minBeta = newMaxBeta
+            elif len(newMinRoots) == 3 and len(newMaxRoots) == 2:
+                bistabilityIndex = max(newMinRoots)
+                if stopAtBistability:
+                    break
+                minBeta = newMinBeta
+                maxBeta = newMaxBeta
+            elif len(newMinRoots) == 3 and len(newMaxRoots) == 3:
+                bistabilityIndex = max(newMaxRoots)
+                if stopAtBistability:
+                    break
+                minBeta = newMaxBeta
 
-    return bistabilityIndex
+        return bistabilityIndex
 
-def calculateTheoreticalCriticalAlpha(gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, digits=4, tolerance=0.0001):
+    else:
+        print("Invalid choice")
+
+def calculateTheoreticalCriticalAlpha(gamma, betaCrit, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, digits=4, tolerance=0.0001, option="fast"):
     if meanSimplexDegree == None:
         meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
 
     minAlphaCrit = minAlpha
     maxAlphaCrit = maxAlpha
 
-    bistabilityOfMinAlpha = calculateTheoreticalBistability(gamma, minBeta, maxBeta, minAlphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance, stopAtBistability=True)
+    bistabilityOfMinAlpha = calculateTheoreticalBistability(gamma, betaCrit, minAlphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance, stopAtBistability=False, option=option)
 
-    bistabilityOfMaxAlpha = calculateTheoreticalBistability(gamma, minBeta, maxBeta, maxAlphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance, stopAtBistability=True)
+    bistabilityOfMaxAlpha = calculateTheoreticalBistability(gamma, betaCrit, maxAlphaCrit, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance, stopAtBistability=False, option=option)
 
     if bistabilityOfMinAlpha < tolerance and bistabilityOfMaxAlpha > tolerance:
         # Bisection method
         while maxAlphaCrit - minAlphaCrit > tolerance:
             newAlpha = 0.5*(minAlphaCrit + maxAlphaCrit)
-            bistabilityOfNewAlpha = calculateTheoreticalBistability(gamma, minBeta, maxBeta, newAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=0.1*tolerance, stopAtBistability=True)
+            bistabilityOfNewAlpha = calculateTheoreticalBistability(gamma, betaCrit, newAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=0.1*tolerance, stopAtBistability=False, option=option)
             if bistabilityOfNewAlpha == 0:
                 minAlphaCrit = newAlpha
             else:

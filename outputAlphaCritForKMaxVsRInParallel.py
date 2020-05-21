@@ -21,6 +21,7 @@ numProcesses = len(os.sched_getaffinity(0))
 print("Number of cores is " + str(numProcesses))
 digits = 4
 tolerance = 0.0001
+option = "fast"
 minAlpha = 0.0
 maxAlpha = 0.1
 m = np.size(maxDegreeList,0)
@@ -42,11 +43,9 @@ for i in range(m):
         else:
             firstOrderAlphaCritGrid[i,j] = meanCubedDegree/meanDegree**4*gamma
 
+        betaCrit = meanDegree/meanSquaredDegree*gamma
 
-        minBeta = 0.5*meanDegree/meanSquaredDegree*gamma
-        maxBeta = 1.5*meanDegree/meanSquaredDegree*gamma
-
-        argList.append((gamma, minBeta, maxBeta, minAlpha, maxAlpha, degreeHist, meanSimplexDegree, isDegreeCorrelated, digits, tolerance))
+        argList.append((gamma, betaCrit, minAlpha, maxAlpha, degreeHist, meanSimplexDegree, isDegreeCorrelated, digits, tolerance, option))
 
 start = time.time()
 with mp.Pool(processes=numProcesses) as pool:
