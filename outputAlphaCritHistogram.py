@@ -16,7 +16,7 @@ type = "power-law"
 minDegree = 50
 maxDegree = 1000
 numPoints = 1000
-r = 3
+exponent = 3
 
 numSimulations = 1000
 numProcesses = mp.cpu_count()
@@ -29,7 +29,7 @@ maxAlpha = 0.1
 
 argList = list()
 for i in range(numSimulations):
-    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(numPoints, minDegree, maxDegree, r, isRandom=True)
+    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(numPoints, minDegree, maxDegree, exponent, isRandom=True)
     degreeHist = degreeSequenceToHist(degreeSequence)
 
     meanDegree = sum([k*prob for k, prob in degreeHist])

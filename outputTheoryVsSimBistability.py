@@ -1,4 +1,4 @@
-import simplexUtilities
+exponentimport simplexUtilities
 import simplexTheory
 import simplexVisualize
 import simplexContagion
@@ -22,7 +22,7 @@ equilibria = data[3]
 degreeSequence = data[4] # This is the full list of equilibria if it's an ensemble run
 isDegreeCorrelated = data[5]
 type = data[6]
-r = data[7]
+exponent = data[7]
 if isinstance(degreeSequence[0], list) : # set degree sequence to none if "degree"
     degreeSequence = None
     meanDegree = data[8]

@@ -147,11 +147,11 @@ def degreeSequenceToHist(degreeSequence):
         degreeHist[i][1] = degreeHist[i][1]/n
     return degreeHist
 
-def generateTheoreticalDegreeHist(minDegree, maxDegree, networkDist, r=4):
+def generateTheoreticalDegreeHist(minDegree, maxDegree, networkDist, exponent=4):
     degreeHist = list()
     for degree in range(minDegree, maxDegree+1):
         if networkDist == "power-law":
-            prob = truncatedPowerLaw(degree, minDegree, maxDegree, r)
+            prob = truncatedPowerLaw(degree, minDegree, maxDegree, exponent)
         elif networkDist == "uniform":
             prob = 1.0/(maxDegree-minDegree+1)
         else:
@@ -207,17 +207,17 @@ def fV(U, V, gamma, beta, alpha, degreeHist, meanSimplexDegree):
 
     return sumU-U
 
-def truncatedPowerLaw(k, minDegree, maxDegree, r):
-    return (r-1)/(minDegree**(1-r)-maxDegree**(1-r))*k**(-r)
+def truncatedPowerLaw(k, minDegree, maxDegree, exponent):
+    return (exponent-1)/(minDegree**(1-exponent)-maxDegree**(1-exponent))*k**(-exponent)
 
-def avgOfPowerLaw(minDegree, maxDegree, r):
-    return (minDegree**(2-r)-maxDegree**(2-r))*(r-1)/((minDegree**(1-r)-maxDegree**(1-r))*(r-2))
+def avgOfPowerLaw(minDegree, maxDegree, exponent):
+    return (minDegree**(2-exponent)-maxDegree**(2-exponent))*(exponent-1)/((minDegree**(1-exponent)-maxDegree**(1-exponent))*(exponent-2))
 
-def avgOfPowerLawEqn(minDegree, maxDegree, r, meanDeg):
-    return (minDegree**(2-r)-maxDegree**(2-r))*(r-1)/((minDegree**(1-r)-maxDegree**(1-r))*(r-2)) - meanDeg
+def avgOfPowerLawEqn(minDegree, maxDegree, exponent, meanDeg):
+    return (minDegree**(2-exponent)-maxDegree**(2-exponent))*(exponent-1)/((minDegree**(1-exponent)-maxDegree**(1-exponent))*(exponent-2)) - meanDeg
 
-def meanPowerOfPowerLaw(minDegree, maxDegree, r, power):
-    return (minDegree**(power+1-r)-maxDegree**(power+1-r))*(r-1)/((minDegree**(1-r)-maxDegree**(1-r))*(r-power-1))
+def meanPowerOfPowerLaw(minDegree, maxDegree, exponent, power):
+    return (minDegree**(power+1-exponent)-maxDegree**(power+1-exponent))*(pwoer-1)/((minDegree**(1-exponent)-maxDegree**(1-exponent))*(exponent-power-1))
 
 def calculateTheoreticalBistabilityVisually(gamma, minBeta, maxBeta, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, digits=4, tolerance=0.0001, stopAtBistability=False):
     if meanSimplexDegree == None:

@@ -7,7 +7,7 @@ import simplexVisualize
 
 filename = 'equilibriaData_power-law_r=3_dep_nonrandom_degree'
 filename = 'Non-Random Degree/equilibriaData_power-law_r=3_dep_nonrandom_degree'
-#filename = 'equilibriaData05172020-013422'
+filename = 'equilibriaData05212020-214652'
 #filename = 'equilibriaData03042020-165346'
 #filename = 'Poster/uniform_dep'
 with open(filename, 'rb') as file:

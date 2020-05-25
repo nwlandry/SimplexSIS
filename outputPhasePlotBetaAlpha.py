@@ -16,11 +16,11 @@ isDegreeCorrelated = True
 type = "power-law"
 minDegree = 67
 maxDegree = 450
-r = 4.0
+exponent = 4.0
 majorityVote = True
 healing = False
 
-degreeHist = generateTheoreticalDegreeHist(minDegree, maxDegree, type, r=r)
+degreeHist = generateTheoreticalDegreeHist(minDegree, maxDegree, type, exponent=exponent)
 
 meanDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
 meanSquaredDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 2)

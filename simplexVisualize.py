@@ -28,7 +28,7 @@ def plotTheoreticalAndSimInfectionCurves(equilibrium, gamma, beta, alpha, degree
     plt.figure()
     betaTheory = np.linspace(min(beta), max(beta), numTheoryPoints)
     for betaVal in betaTheory:
-        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, minDegree, maxDegree, meanSimplexDegree, degreeHist=degreeHist, isDegreeCorrelated=isDegreeCorrelated, type=type, r=r, digits=digits)
+        roots = simplexTheory.solveEquilibrium(gamma, betaVal, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
         print(roots)
         for root in roots:
             plt.scatter(betaVal, root, color='black')

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 filename = "Paper Figures/alphaCritUncorrelated"
-filename = "alphaCrit05202020-170852"
+filename = "alphaCrit05232020-151938"
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 
@@ -29,7 +29,7 @@ plt.show()
 plt.figure()
 x = np.linspace(xMin, xMax, np.size(alphaCritGrid, axis=1))
 y = np.linspace(yMin, yMax, np.size(alphaCritGrid, axis=0))
-c = plt.contour(x, y, np.divide(firstOrderAlphaCritGrid-alphaCritGrid,alphaCritGrid), 8)
+c = plt.contour(x, y, np.divide(firstOrderAlphaCritGrid-alphaCritGrid,alphaCritGrid), 15)
 plt.clabel(c, inline=1, fontsize=10)
 plt.xlabel("Power-Law Exponent")
 plt.ylabel("Maximum degree")

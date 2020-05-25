@@ -12,7 +12,7 @@ import multiprocessing as mp
 
 # graph parameters
 # graph parameters
-r = 4 # power law exponent
+exponent = 4 # power law exponent
 minDegree = 50.3
 maxDegree = 100
 n = 1000
@@ -24,7 +24,7 @@ meanDegree = 10
 isRandom = False
 
 # Epidemic parameters
-initialFraction = 0.06
+initialFexponentraction = 0.06
 
 #simulation parameters
 timesteps = 1000
@@ -47,7 +47,7 @@ initialConditions = [x01, x02]
 if degreeDistType == "uniform":
     degreeSequence = simplexUtilities.generateUniformDegreeSequence(n, minDegree, maxDegree, isRandom=isRandom)
 elif degreeDistType == "power-law":
-    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, r, isRandom=isRandom)
+    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, exponent, isRandom=isRandom)
 elif degreeDistType == "poisson":
     degreeSequence = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
 

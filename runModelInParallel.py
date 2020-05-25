@@ -16,10 +16,10 @@ maxDegree = float(sys.argv[3])
 n = int(sys.argv[4])
 isDegreeCorrelated = (sys.argv[5] == "True")
 meanSimplexDegree = float(sys.argv[6])
-r = float(sys.argv[7]) # power law exponent
-isRandom = False
+exponent = float(sys.argv[7]) # power law exponent
+isRandom = True
 simplexSize = 3
-meanDegree = 50
+meanDegree = 100
 
 # Epidemic parameters
 initialFraction = 0.01
@@ -30,9 +30,9 @@ numProcesses = len(os.sched_getaffinity(0))
 print("Number of cores is " + str(numProcesses))
 timesteps = 1000
 dt = 0.1
-nodeFractionToRestart = 0.001
+nodeFractionToRestart = 0.0002
 # length over which to average
-avgLength = int(0.3*timesteps)
+avgLength = int(0.5*timesteps)
 numBetaPts = 31
 numAlphaPts = numProcesses
 gamma = 2
@@ -52,7 +52,7 @@ endBetaCritFraction = 1.5
 if degreeDistType == "uniform":
     degreeSequence = simplexUtilities.generateUniformDegreeSequence(n, minDegree, maxDegree, isRandom=isRandom)
 elif degreeDistType == "power-law":
-    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, r, isRandom=isRandom)
+    degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, exponent, isRandom=isRandom)
 elif degreeDistType == "poisson":
     degreeSequence = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
 
@@ -96,4 +96,4 @@ end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 
 with open('equilibriaData' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([gamma, beta, alpha, equilibria, degreeSequence, isDegreeCorrelated, degreeDistType, r, meanSimplexDegree], file)
+    pickle.dump([gamma, beta, alpha, equilibria, degreeSequence, isDegreeCorrelated, degreeDistType, exponent, meanSimplexDegree], file)
