@@ -15,7 +15,7 @@ gamma = 2
 isDegreeCorrelated = True
 type = "power-law"
 minDegree = 67
-maxDegree = 450
+maxDegree = 1000
 exponent = 4.0
 majorityVote = True
 healing = False
@@ -28,11 +28,11 @@ meanSimplexDegree = meanDegree
 
 minBeta = 0.5*meanDegree/meanSquaredDegree*gamma
 maxBeta = 1.5*meanDegree/meanSquaredDegree*gamma
-beta = np.linspace(minBeta, maxBeta, 51)
+beta = np.linspace(minBeta, maxBeta, 101)
 
 minAlpha = 0.0
 maxAlpha = 0.06
-alpha = np.linspace(minAlpha, maxAlpha, 51)
+alpha = np.linspace(minAlpha, maxAlpha, 101)
 
 numProcesses = len(os.sched_getaffinity(0))
 digits = 4

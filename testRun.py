@@ -9,30 +9,36 @@ import pickle
 from datetime import datetime
 import time
 import multiprocessing as mp
+import simplexTheory
 
 # graph parameters
 # graph parameters
-exponent = 4 # power law exponent
-minDegree = 67
+exponent = 3 # power law exponent
+minDegree = 10
 maxDegree = 1000
-n = 10000
+n = 30000
 simplexSize = 3
 isDegreeCorrelated = True
 degreeDistType = "power-law"
-meanSimplexDegree = 30
-meanDegree = 10
+meanSimplexDegree = 20
+meanDegree = 20
 isRandom = True
 
 #simulation parameters
-timesteps = 100
+timesteps = 3000
 dt = 0.1
-numNodesToRestart = 0.0001
+numNodesToRestart = 10
 gamma = 2
-betaCritFraction = 1.03
-alpha = 0.0
+betaCritFraction = 0.99
+alphaCritFraction = 1.5
+tolerance = 0.0001
+minAlpha = 0
+maxAlpha = 0.3
+digits = 5
+option = "fast"
 
 # Epidemic parameters
-initialFraction = 0.01
+initialFraction = 0.0
 x01 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
 # initialFraction = 1
 # x02 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
@@ -45,6 +51,7 @@ elif degreeDistType == "power-law":
     degreeSequence = simplexUtilities.generatePowerLawDegreeSequence(n, minDegree, maxDegree, exponent, isRandom=isRandom)
 elif degreeDistType == "poisson":
     degreeSequence = simplexUtilities.generatePoissonDegreeSequence(n, meanDegree)
+degreeHist = simplexTheory.degreeSequenceToHist(degreeSequence)
 
 A = simplexUtilities.generateConfigModelAdjacency(degreeSequence)
 
@@ -66,9 +73,17 @@ else:
     [simplexList, simplexIndices] = simplexUtilities.generateUniformSimplexList(n, meanSimplexDegree, simplexSize)
 
 betaCrit = meanDegree/meanSquaredDegree*gamma
+alphaCrit = simplexTheory.calculateTheoreticalCriticalAlpha(gamma, betaCrit, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits, tolerance=tolerance, option=option)
+print(stop)
+alpha = alphaCritFraction*alphaCrit
 beta = betaCritFraction*betaCrit
 
+roots = simplexTheory.solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=isDegreeCorrelated, majorityVote=True, healing=False, digits=4)
+
 plt.figure()
+for root in roots:
+    plt.plot([0, (timesteps-1)*dt], [root, root], 'k--')
+
 start = time.time()
 for x0 in initialConditions:
     averageInfection, endState = simplexContagion.microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, numNodesToRestart)

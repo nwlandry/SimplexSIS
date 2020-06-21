@@ -6,45 +6,45 @@ import multiprocessing as mp
 import math
 import matplotlib.pyplot as plt
 
-def microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, nodeFractionToRestart, majorityVote=True):
+def microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, numNodesToRestart, majorityVote=True):
     """Dynamical system"""
     n = np.shape(x0)[0]
     averageX = np.empty(timesteps)
     X = x0.copy()
+    Xnew = x0.copy()
+    # Based on the model set the threshold
+    if majorityVote:
+        thresholdInfection = 2
+    else:
+        thresholdInfection = 1
+
     for i in range(timesteps-1):
         averageX[i] = np.mean(X)
         if averageX[i] == 0:
             # Restart a fraction of the population if the infection dies out
-            X[random.sample(range(n), int(nodeFractionToRestart*n))] = 1
+            X[random.sample(range(n), numNodesToRestart)] = 1
 
         pInfectByNeighbors = 1-np.power(1-beta*dt, A.dot(X))
         for j in range(n):
             if X[j]==1:
                 # heal
-                X[j] = random.random() > gamma*dt
+                Xnew[j] = random.random() > gamma*dt
             else:
                 # infect by neighbor
-                X[j] = random.random() <= pInfectByNeighbors[j]
+                Xnew[j] = random.random() <= pInfectByNeighbors[j]
 
                 # don't run if there is zero contribution from simplices
                 # and don't run if already infected
-                if X[j] == 0 and alpha != 0:
+                if Xnew[j] == 0 and alpha != 0:
                     # infect by simplex
                     numInfectedSimplices = 0
-
-                    # Based on the model set the threshold
-                    if majorityVote:
-                        thresholdInfection = 2
-                    else:
-                        thresholdInfection = 1
 
                     for index in simplexIndices[j]:
                         if sum([X[member] for member in simplexList[index]]) >= thresholdInfection:
                             numInfectedSimplices = numInfectedSimplices + 1
                     pInfectBySimplex = 1 - (1 - alpha*dt)**numInfectedSimplices
-                    if random.random() <= pInfectBySimplex:
-                        X[j] = 1
-
+                    Xnew[j] = random.random() <= pInfectBySimplex
+        X = Xnew.copy()
     averageX[-1] = np.mean(X)
     return averageX, X
 
@@ -124,33 +124,33 @@ def minUniform(u, n):
     else:
         return 1-math.pow(1-u,1.0/n)
 
-def generateSISEquilibria(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, nodeFractionToRestart, verbose=True):
+def generateSISEquilibria(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numNodesToRestart, verbose=True):
     equilibria = np.empty([len(alpha), len(beta)])
     for i in range(len(alpha)):
         x = x0.copy()
         for j in range(len(beta)):
-            [sol, x] = microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta[j], alpha[i], x, timesteps, dt, nodeFractionToRestart)
+            [sol, x] = microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta[j], alpha[i], x, timesteps, dt, numNodesToRestart)
             equilibria[i,j] = np.mean(sol[-avgLength:-1])
             if verbose:
                 print('alpha='+str(alpha[i])+', beta='+str(beta[j]), flush=True)
     return equilibria
 
-def generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, nodeFractionToRestart, numProcesses, verbose=True):
+def generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numNodesToRestart, numProcesses, verbose=True):
     argList = list()
     for alphaVal in alpha:
-        argList.append((A, simplexList, simplexIndices, gamma, beta, alphaVal, x0, timesteps, dt, avgLength, nodeFractionToRestart, verbose))
+        argList.append((A, simplexList, simplexIndices, gamma, beta, alphaVal, x0, timesteps, dt, avgLength, numNodesToRestart, verbose))
     with mp.Pool(processes=numProcesses) as pool:
         equilibria = pool.starmap(runOneCurve, argList)
 
     return equilibria
 
-def generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, nodeFractionToRestart, numProcesses, verbose=True):
+def generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, simplexIndicesList, gamma, beta, alpha, initialFraction, timesteps, dt, avgLength, numSimulations, numNodesToRestart, numProcesses, verbose=True):
     argList = list()
     n = np.size(adjacencyList[0], axis=0)
     for alphaVal in alpha:
         for i in range(numSimulations):
             x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
-            argList.append((adjacencyList[i], simplexSetList[i], simplexIndicesList[i], gamma, beta, alphaVal, x0, timesteps, dt, avgLength, nodeFractionToRestart, verbose))
+            argList.append((adjacencyList[i], simplexSetList[i], simplexIndicesList[i], gamma, beta, alphaVal, x0, timesteps, dt, avgLength, numNodesToRestart, verbose))
 
     with mp.Pool(processes=numProcesses) as pool:
         equilibria = pool.starmap(runOneCurve, argList)
@@ -159,10 +159,10 @@ def generateSISEquilibriaEnsembleParallelized(adjacencyList, simplexSetList, sim
         averagedEquilibria.append([sum(val)/numSimulations for val in zip(*equilibria[i*numSimulations:(i+1)*numSimulations])])
     return averagedEquilibria, equilibria
 
-def runOneCurve(A, simplexList, simplexIndices, gamma, beta, alpha, x, timesteps, dt, avgLength, nodeFractionToRestart, verbose=True):
+def runOneCurve(A, simplexList, simplexIndices, gamma, beta, alpha, x, timesteps, dt, avgLength, numNodesToRestart, verbose=True):
     equilibria = list()
     for i in range(len(beta)):
-        [sol, x] = microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta[i], alpha, x, timesteps, dt, nodeFractionToRestart)
+        [sol, x] = microscopicSimplexSISDynamics(A, simplexList, simplexIndices, gamma, beta[i], alpha, x, timesteps, dt, numNodesToRestart)
         equilibria.append(np.mean(sol[-avgLength:-1]))
         if verbose:
             print('alpha='+str(alpha)+', beta='+str(beta[i]), flush=True)

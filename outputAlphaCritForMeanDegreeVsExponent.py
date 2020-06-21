@@ -34,7 +34,7 @@ argList = list()
 for i in range(m):
     for j in range(n):
         minDegree = fsolve(simplexTheory.avgOfPowerLawEqn, initialGuess, args=(maxDegree, exponentList[j], meanDegreeList[i]))
-        degreeHist = generateTheoreticalDegreeHist(int(minDegree), maxDegree, type, power=exponentList[j])
+        degreeHist = generateTheoreticalDegreeHist(int(minDegree), maxDegree, type, exponent=exponentList[j])
 
         meanDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
         meanSquaredDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 2)

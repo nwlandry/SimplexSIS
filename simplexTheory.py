@@ -1,13 +1,14 @@
 from scipy.optimize import fsolve, root
 import matplotlib.pyplot as plt
 import numpy as np
+from itertools import groupby
 
 def getPhase(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, majorityVote=True, healing=False, digits=4):
     return len(solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, majorityVote=majorityVote, healing=healing, digits=digits))
 
 def solveEquilibrium(gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, majorityVote=True, healing=False, digits=4):
     if meanSimplexDegree is None:
-        meanSimplexDegree = generateMeanDegreeFromHist(degreeHist)
+        meanSimplexDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
 
     if majorityVote:
         if isDegreeCorrelated:
@@ -133,19 +134,8 @@ def uncorrelatedEquilibriumFunctionIndividual(vars, gamma, beta, alpha, degreeHi
     return [sumU-U, 1/meanDegree*sumV - V]
 
 def degreeSequenceToHist(degreeSequence):
-    degreeHist = list()
-    sortedDegreeSequence = sorted(degreeSequence)
     n = len(degreeSequence)
-    currentDegree = 0
-    for degree in sortedDegreeSequence:
-        if degree != currentDegree:
-            currentDegree = degree
-            degreeHist.append([degree, 1])
-        else:
-            degreeHist[-1][1] = degreeHist[-1][1] + 1
-    for i in range(len(degreeHist)):
-        degreeHist[i][1] = degreeHist[i][1]/n
-    return degreeHist
+    return [[key, len(list(group))/n] for key, group in groupby(degreeSequence)]
 
 def generateTheoreticalDegreeHist(minDegree, maxDegree, networkDist, exponent=4):
     degreeHist = list()
@@ -217,11 +207,11 @@ def avgOfPowerLawEqn(minDegree, maxDegree, exponent, meanDeg):
     return (minDegree**(2-exponent)-maxDegree**(2-exponent))*(exponent-1)/((minDegree**(1-exponent)-maxDegree**(1-exponent))*(exponent-2)) - meanDeg
 
 def meanPowerOfPowerLaw(minDegree, maxDegree, exponent, power):
-    return (minDegree**(power+1-exponent)-maxDegree**(power+1-exponent))*(pwoer-1)/((minDegree**(1-exponent)-maxDegree**(1-exponent))*(exponent-power-1))
+    return (minDegree**(power+1-exponent)-maxDegree**(power+1-exponent))*(power-1)/((minDegree**(1-exponent)-maxDegree**(1-exponent))*(exponent-power-1))
 
 def calculateTheoreticalBistabilityVisually(gamma, minBeta, maxBeta, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, digits=4, tolerance=0.0001, stopAtBistability=False):
     if meanSimplexDegree == None:
-        meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
+        meanSimplexDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
 
     plt.figure()
     minRoots = solveEquilibrium(gamma, minBeta, alpha, degreeHist, meanSimplexDegree=meanSimplexDegree, isDegreeCorrelated=isDegreeCorrelated, digits=digits)
@@ -262,7 +252,7 @@ def calculateTheoreticalBistabilityVisually(gamma, minBeta, maxBeta, alpha, degr
 
 def calculateTheoreticalBistability(gamma, betaCrit, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, digits=4, tolerance=0.0001, stopAtBistability=False, option="fast"):
     if meanSimplexDegree == None:
-        meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
+        meanSimplexDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
 
     minBeta = 0.5*betaCrit
     maxBeta = 1.5*betaCrit
@@ -362,7 +352,7 @@ def calculateTheoreticalBistability(gamma, betaCrit, alpha, degreeHist, meanSimp
 
 def calculateTheoreticalCriticalAlpha(gamma, betaCrit, minAlpha, maxAlpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, digits=4, tolerance=0.0001, option="fast"):
     if meanSimplexDegree == None:
-        meanSimplexDegree = sum([k*prob for k, prob in degreeHist])
+        meanSimplexDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
 
     minAlphaCrit = minAlpha
     maxAlphaCrit = maxAlpha

@@ -1,8 +1,42 @@
 import random
 import scipy
+from simplexTheory import *
 from scipy.sparse import csr_matrix
 import numpy as np
 import multiprocessing as mp
+
+def criticalBeta3(degreeHist, isDegreeCorrelated, gamma):
+
+    k1 = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
+    k2 = computeMeanPowerOfDegreeFromHist(degreeHist, 2)
+    k3 = computeMeanPowerOfDegreeFromHist(degreeHist, 3)
+    k4 = computeMeanPowerOfDegreeFromHist(degreeHist, 4)
+    k5 = computeMeanPowerOfDegreeFromHist(degreeHist, 5)
+
+    if isDegreeCorrelated:
+        return k3*k1**2/k2**3*gamma
+
+    else:
+
+        def a2(beta3, k1, k2, k3, gamma):
+            return (beta3*k1**5 - gamma*k1*k3)/(k2**2*gamma)
+
+        def a3(beta3, k1, k2, k3, k4, gamma):
+            return k1**2*(gamma*k4 - 2*beta3*k1*(2*k1**2*k2 - k1*k3))/(k2**3*gamma)
+
+        def a4(beta3, k1, k2, k3, k4, k5, gamma):
+            return -k1**2*(gamma**2*k1*k5 - gamma*beta3*(3*k1**4*k3 + 4*k1**2*k2*(k1*k2 - k3) + k1*(k3 - k1*k2)**2) + k1**8*beta3**2)/(k2**4*gamma**2)
+
+        def f(beta3, k1, k2, k3, k4, k5, gamma):
+            return a3(beta3, k1, k2, k3, k4, gamma)**2 - 4*a2(beta3, k1, k2, k3, gamma)*a4(beta3, k1, k2, k3, k4, k5, gamma)
+
+        b1 = fsolve(f, 0.1, args=(k1, k2, k3, k4, k5, gamma))
+
+        # saddle-node bifurcation
+        if a4(b1, k1, k2, k3, k4, k5, gamma) < 0 and -a3(b1, k1, k2, k3, k4, gamma)/(2*a4(b1, k1, k2, k3, k4, k5, gamma)) > 0 and -a3(b1, k1, k2, k3, k4, gamma)/(2*a4(b1, k1, k2, k3, k4, k5, gamma)) < 1:
+            return b1
+        else:
+            return k3/k1**4*gamma
 
 def meanPowerOfDegree(degreeSequence, power):
     return np.asscalar(np.power(degreeSequence, power).mean())

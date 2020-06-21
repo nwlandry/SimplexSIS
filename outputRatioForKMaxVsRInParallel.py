@@ -5,6 +5,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 from simplexTheory import *
+import simplexUtilities
 import multiprocessing as mp
 from datetime import datetime
 import time
@@ -27,7 +28,8 @@ maxAlpha = 0.1
 m = np.size(maxDegreeList,0)
 n = np.size(exponentList,0)
 
-firstOrderAlphaCritGrid = np.zeros([m,n])
+betaCritGrid = np.zeros([m,n])
+expansionRatioGrid = np.zeros([m,n])
 
 argList = list()
 for i in range(m):
@@ -36,16 +38,13 @@ for i in range(m):
 
         meanDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 1)
         meanSquaredDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 2)
-        meanCubedDegree = computeMeanPowerOfDegreeFromHist(degreeHist, 3)
         meanSimplexDegree = meanDegree
-        if isDegreeCorrelated:
-            firstOrderAlphaCritGrid[i,j] = meanCubedDegree*meanDegree**2/meanSquaredDegree**3*gamma
-        else:
-            firstOrderAlphaCritGrid[i,j] = meanCubedDegree/meanDegree**4*gamma
 
-        betaCrit = meanDegree/meanSquaredDegree*gamma
+        betaCritGrid[i,j] = meanDegree/meanSquaredDegree*gamma
 
-        argList.append((gamma, betaCrit, minAlpha, maxAlpha, degreeHist, meanSimplexDegree, isDegreeCorrelated, digits, tolerance, option))
+        expansionRatioGrid[i,j] = simplexUtilities.criticalBeta3(degreeHist, isDegreeCorrelated, gamma)/betaCritGrid[i,j]
+
+        argList.append((gamma, betaCritGrid[i,j], minAlpha, maxAlpha, degreeHist, meanSimplexDegree, isDegreeCorrelated, digits, tolerance, option))
 
 start = time.time()
 with mp.Pool(processes=numProcesses) as pool:
@@ -53,11 +52,12 @@ with mp.Pool(processes=numProcesses) as pool:
 print("Time elapsed is " + str(time.time() - start) + "s", flush=True)
 
 alphaCritGrid = np.reshape(alphaCritList, (m,n))
+ratioGrid = np.divide(alphaCritGrid,betaCritGrid)
 
 xMin = np.min(exponentList)
 xMax = np.max(exponentList)
 yMin = np.min(maxDegreeList)
 yMax = np.max(maxDegreeList)
 
-with open('alphaCrit' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
-    pickle.dump([xMin, xMax, yMin, yMax, alphaCritGrid, firstOrderAlphaCritGrid], file)
+with open('ratio' + datetime.now().strftime("%m%d%Y-%H%M%S"), 'wb') as file:
+    pickle.dump([xMin, xMax, yMin, yMax, ratioGrid, expansionRatioGrid], file)

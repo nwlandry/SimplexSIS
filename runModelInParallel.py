@@ -10,10 +10,10 @@ import sys
 import numpy as np
 
 # graph parameters
-degreeDistType = sys.argv[1]
-minDegree = float(sys.argv[2])
-maxDegree = float(sys.argv[3])
-n = int(sys.argv[4])
+n = int(sys.argv[1])
+degreeDistType = sys.argv[2]
+minDegree = float(sys.argv[3])
+maxDegree = float(sys.argv[4])
 isDegreeCorrelated = (sys.argv[5] == "True")
 meanSimplexDegree = float(sys.argv[6])
 exponent = float(sys.argv[7]) # power law exponent
@@ -22,31 +22,31 @@ simplexSize = 3
 meanDegree = 100
 
 # Epidemic parameters
-initialFraction = 0.01
+initialFraction = 0
 x0 = np.random.choice([0, 1], size=n, p=[1-initialFraction, initialFraction])
 
 #simulation parameters
 numProcesses = len(os.sched_getaffinity(0))
 print("Number of cores is " + str(numProcesses))
-timesteps = 1000
+timesteps = 3000
 dt = 0.1
-nodeFractionToRestart = 0.0002
+numNodesToRestart = 10
 # length over which to average
-avgLength = int(0.5*timesteps)
-numBetaPts = 31
+avgLength = int(1.0/3.0*timesteps)
+numBetaPts = 11
 numAlphaPts = numProcesses
 gamma = 2
 
 tolerance = 0.0001
 option = "fast"
 minAlpha = 0
-maxAlpha = 0.2
+maxAlpha = 0.3
 digits = 5
 
 startAlphaCritFraction = 0.5
 endAlphaCritFraction = 1.5
-startBetaCritFraction = 0.5
-endBetaCritFraction = 1.5
+startBetaCritFraction = 0.85
+endBetaCritFraction = 1.15
 
 # generate degree sequence and adjacency matrix
 if degreeDistType == "uniform":
@@ -91,7 +91,7 @@ beta = np.concatenate([np.linspace(startBetaCritFraction*betaCrit, endBetaCritFr
 alpha = np.linspace(startAlphaCritFraction*alphaCrit, endAlphaCritFraction*alphaCrit, numAlphaPts)
 
 start = time.time()
-equilibria = simplexContagion.generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, nodeFractionToRestart, numProcesses)
+equilibria = simplexContagion.generateSISEquilibriaParallelized(A, simplexList, simplexIndices, gamma, beta, alpha, x0, timesteps, dt, avgLength, numNodesToRestart, numProcesses)
 end = time.time()
 print('The elapsed time is ' + str(end-start) + 's')
 

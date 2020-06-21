@@ -5,8 +5,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename = "Paper Figures/alphaCritUncorrelated"
-filename = "alphaCrit05232020-151938"
+filename = "Paper Figures/ratioUncorrelated"
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 
@@ -22,17 +21,23 @@ x = np.linspace(xMin, xMax, np.size(alphaCritGrid, axis=1))
 y = np.linspace(yMin, yMax, np.size(alphaCritGrid, axis=0))
 c = plt.contour(x, y, alphaCritGrid, 10)
 plt.clabel(c, inline=1, fontsize=10)
-plt.xlabel("Power-Law Exponent")
-plt.ylabel("Maximum degree")
+plt.xlabel(r"$r$", fontsize=18)
+plt.ylabel(r"$k_{max}$", fontsize=18)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.tight_layout()
 plt.show()
 
 plt.figure()
 x = np.linspace(xMin, xMax, np.size(alphaCritGrid, axis=1))
 y = np.linspace(yMin, yMax, np.size(alphaCritGrid, axis=0))
-c = plt.contour(x, y, np.divide(firstOrderAlphaCritGrid-alphaCritGrid,alphaCritGrid), 15)
+c = plt.contour(x, y, np.divide(firstOrderAlphaCritGrid-alphaCritGrid,alphaCritGrid), 10)
 plt.clabel(c, inline=1, fontsize=10)
-plt.xlabel("Power-Law Exponent")
-plt.ylabel("Maximum degree")
+plt.xlabel(r"$r$", fontsize=18)
+plt.ylabel(r"$k_{max}$", fontsize=18)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.tight_layout()
 plt.show()
 
 #
