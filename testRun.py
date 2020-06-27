@@ -15,11 +15,11 @@ import simplexTheory
 # graph parameters
 exponent = 3 # power law exponent
 minDegree = 10
-maxDegree = 1000
+maxDegree = 30
 n = 30000
 simplexSize = 3
 isDegreeCorrelated = True
-degreeDistType = "power-law"
+degreeDistType = "uniform"
 meanSimplexDegree = 20
 meanDegree = 20
 isRandom = True
@@ -33,7 +33,7 @@ betaCritFraction = 0.99
 alphaCritFraction = 1.5
 tolerance = 0.0001
 minAlpha = 0
-maxAlpha = 0.3
+maxAlpha = 0.5
 digits = 5
 option = "fast"
 

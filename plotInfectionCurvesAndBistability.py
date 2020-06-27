@@ -4,16 +4,13 @@ import numpy as np
 import simplexUtilities
 import simplexVisualize
 
-
-#filename = 'equilibriaData_power-law_r=3_dep_nonrandom_degree'
-#filename = 'Non-Random Degree/equilibriaData_power-law_r=3_dep_nonrandom_degree'
 #filename = 'equilibriaData06062020-002032'# Uniform DC
 #filename = 'equilibriaData06052020-221523' # Uniform UC
 #filename = 'equilibriaData06052020-204903' # r=4 DC
+#filename = 'equilibriaData06052020-183753' # r=4 UC
 #filename = 'equilibriaData06062020-003754' # r=3 DC
-filename = 'equilibriaData06112020-050847' # r=3 UC
-filename = 'equilibriaData06112020-074534' # r=4 UC
-filename = 'equilibriaData06142020-212240' # r=4 UC
+filename = 'equilibriaData06252020-192836' # r=3 UC
+
 with open(filename, 'rb') as file:
     data = pickle.load(file)
 gamma = data[0]
@@ -40,6 +37,7 @@ for i in range(len(alpha)):
     bistability.append(simplexVisualize.calculateBistability(equilibria[i], beta, option='infinity'))
 
 plt.figure()
+plt.plot([0.5*(min(alpha)+max(alpha)), 0.5*(min(alpha)+max(alpha))], [0,0.4], '--')
 plt.plot(alpha, bistability, 'o-')
 plt.xlabel(r"$\beta_3$", fontsize=24)
 plt.ylabel(r"$B(\beta_3)$", fontsize=24)

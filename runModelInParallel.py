@@ -19,7 +19,7 @@ meanSimplexDegree = float(sys.argv[6])
 exponent = float(sys.argv[7]) # power law exponent
 isRandom = True
 simplexSize = 3
-meanDegree = 100
+meanDegree = 20
 
 # Epidemic parameters
 initialFraction = 0
@@ -30,7 +30,7 @@ numProcesses = len(os.sched_getaffinity(0))
 print("Number of cores is " + str(numProcesses))
 timesteps = 3000
 dt = 0.1
-numNodesToRestart = 10
+numNodesToRestart = 1
 # length over which to average
 avgLength = int(1.0/3.0*timesteps)
 numBetaPts = 11
@@ -40,11 +40,11 @@ gamma = 2
 tolerance = 0.0001
 option = "fast"
 minAlpha = 0
-maxAlpha = 0.3
+maxAlpha = 0.5
 digits = 5
 
-startAlphaCritFraction = 0.5
-endAlphaCritFraction = 1.5
+startAlphaCritFraction = 0
+endAlphaCritFraction = 2
 startBetaCritFraction = 0.85
 endBetaCritFraction = 1.15
 

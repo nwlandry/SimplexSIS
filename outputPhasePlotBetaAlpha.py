@@ -12,7 +12,7 @@ import time
 import os
 
 gamma = 2
-isDegreeCorrelated = True
+isDegreeCorrelated = False
 type = "power-law"
 minDegree = 67
 maxDegree = 1000

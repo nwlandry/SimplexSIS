@@ -24,7 +24,7 @@ def plotTheoreticalInfectionCurves(gamma, beta, alphaCritFractions, alphaCrit, d
     plt.ylabel('infected average')
     plt.show()
 
-def plotTheoreticalAndSimInfectionCurves(equilibrium, gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, numTheoryPoints=50, digits=4):
+def plotTheoreticalAndSimInfectionCurves(axisHandle, equilibrium, gamma, beta, alpha, degreeHist, meanSimplexDegree=None, isDegreeCorrelated=True, numTheoryPoints=50, digits=4):
     lineWidth = 2
     meanDegree = simplexTheory.computeMeanPowerOfDegreeFromHist(degreeHist, 1)
     meanSquaredDegree = simplexTheory.computeMeanPowerOfDegreeFromHist(degreeHist, 2)
@@ -58,12 +58,12 @@ def plotTheoreticalAndSimInfectionCurves(equilibrium, gamma, beta, alpha, degree
             ratioSection3.append(betaVal/meanDegree*meanSquaredDegree/gamma)
             theorySection4.append(roots[2])
             ratioSection4.append(betaVal/meanDegree*meanSquaredDegree/gamma)
-    plt.plot(ratioSection1, theorySection1, 'k-',linewidth=lineWidth)
-    plt.plot(ratioSection2, theorySection2, 'k--',linewidth=lineWidth)
-    plt.plot(ratioSection3, theorySection3, 'k--',linewidth=lineWidth)
-    plt.plot(ratioSection4, theorySection4, 'k-',linewidth=lineWidth)
+    axisHandle.plot(ratioSection1, theorySection1, 'k-',linewidth=lineWidth)
+    axisHandle.plot(ratioSection2, theorySection2, 'k--',linewidth=lineWidth)
+    axisHandle.plot(ratioSection3, theorySection3, 'k--',linewidth=lineWidth)
+    axisHandle.plot(ratioSection4, theorySection4, 'k-',linewidth=lineWidth)
     if min(theorySection4) > 0.05 and len(theorySection3) <= 1:
-        plt.plot([ratioSection4[0], ratioSection4[0]], [0, theorySection4[0]], 'k--',linewidth=lineWidth)
+        axisHandle.plot([ratioSection4[0], ratioSection4[0]], [0, theorySection4[0]], 'k--',linewidth=lineWidth)
 
     lineSegments = list()
     ratioSegments = list()
@@ -92,15 +92,17 @@ def plotTheoreticalAndSimInfectionCurves(equilibrium, gamma, beta, alpha, degree
 
     for i in range(len(lineSegments)):
         if len(lineSegments[i]) == 2:
-            plt.plot(ratioSegments[i], lineSegments[i], '--', color='blue',linewidth=lineWidth)
+            axisHandle.plot(ratioSegments[i], lineSegments[i], '--', color='blue',linewidth=lineWidth)
         else:
-            plt.plot(ratioSegments[i], lineSegments[i], 'o-', color='blue',linewidth=lineWidth)
-
-    plt.xlim([max(0,min(beta)/meanDegree*meanSquaredDegree/gamma-0.01), max(beta)/meanDegree*meanSquaredDegree/gamma+0.01])
-    plt.ylim([-0.005, max(theorySection4)+0.01])
-    plt.xlabel(r'$\beta_2/\beta_2^c$')
-    plt.ylabel(r'$U$')
-    plt.show()
+            axisHandle.plot(ratioSegments[i], lineSegments[i], 'o-', color='blue',linewidth=lineWidth)
+    axisHandle.set_xlim([max(0,min(beta)/meanDegree*meanSquaredDegree/gamma-0.01), max(beta)/meanDegree*meanSquaredDegree/gamma+0.01])
+    axisHandle.set_ylim([-0.005, 0.7])# max(theorySection4)+0.01])
+    plt.tight_layout()
+    plt.close()
+    # plt.xlabel(r'$\beta_2/\beta_2^c$', fontsize=16)
+    # plt.ylabel(r'$U$', fontsize=16)
+    # plt.tight_layout()
+    # plt.show()
 
 def calculateBistability(equilibrium, beta, option='infinity'):
     # These depend on there being an odd number of points
