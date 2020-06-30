@@ -8,7 +8,7 @@ Data and code used to generate results for the paper "The effect of heterogeneit
   - runOneCurve(): Runs a single equilibrium curve.
   - The rest of this file was not used in the paper
 * simplexUtilities.py: Implements functions used to generate the adjacency matrix and the lists of hyperedges.
-  - criticalBeta3(): Computes $\beta_3^c$ from the network properties (Methods in Section IV)
+  - criticalBeta3(): Computes $$\beta_3^c$$ from the network properties (Methods in Section IV)
   - invCDFPowerLaw() and generatePowerLawDegreeSequence(): generate a power-law degree sequence.
   - generateUniformDegreeSequence(): Generates a uniformly distributed degree sequence.
   - generateConfigModelAdjacency(): Generates an adjacency matrix from a degree sequence using the configuration model
@@ -26,4 +26,5 @@ Data and code used to generate results for the paper "The effect of heterogeneit
 * runModelInParallel.py: Runs the microscopic model in parallel
 * outputPhasePlotBetaAlpha.py: Generates the phase plots for the mean-field models.
 * outputRatioForKMaxVsRInParallel: Generates the contour plots of $\beta_3^c/\beta_2^c$ for $k_{max}$ vs. $r$.
-## Paper Figures Folder: Functions and data used to plot the figures in the paper
+## Paper Figures Folder
+Functions and data used to plot the figures in the paper
